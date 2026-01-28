@@ -1,0 +1,6 @@
+# YAML配置文件转Binary TLV工具依赖
+# Python 3.7+
+
+# YAML解析库
+PyYAML>=6.0
+

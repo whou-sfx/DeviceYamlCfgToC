@@ -1,0 +1,175 @@
+# TLV结构Schema定义
+# 此文件定义了所有TLV类型的结构，用于Schema驱动的编码器
+# 添加新的TLV类型只需在此文件中添加定义，无需修改Python代码
+
+TLV_Schemas:
+  # ============================================================================
+  # Device Level TLVs
+  # ============================================================================
+  
+  Device.Basic:
+    type_id: 0x01
+    description: "设备基本信息"
+    fields:
+      - name: TotalDRAMCapacity
+        type: u64
+        parser: size_string
+        description: "总DRAM容量（支持GB/MB/KB/B后缀）"
+        
+      - name: DRAMShareable
+        type: bool
+        description: "DRAM是否可共享"
+    
+    alignment: 4
+
+  Device.PortCapability:
+    type_id: 0x02
+    description: "设备端口能力"
+    fields:
+      - name: MaxPorts
+        type: u8
+        description: "最大端口数"
+    
+    alignment: 4
+
+  # ============================================================================
+  # PCIe Port TLVs
+  # ============================================================================
+  
+  Port.Config:
+    type_id: 0x10
+    description: "端口配置"
+    fields:
+      - name: PortID
+        type: u8
+        description: "端口ID"
+        
+      - name: EnablePort
+        type: bool
+        description: "是否启用端口"
+        
+      - name: PCIeSpeed
+        type: u8
+        parser: enum
+        enum_type: pcie_speed_t
+        description: "PCIe速度"
+        
+      - name: PCIeWidth
+        type: u8
+        parser: enum
+        enum_type: pcie_width_t
+        description: "PCIe宽度"
+        
+      - name: LDMode
+        type: u8
+        parser: enum
+        enum_type: ld_mode_t
+        description: "逻辑设备模式"
+    
+    alignment: 4
+
+  # ============================================================================
+  # Logical Device (LD) TLVs
+  # ============================================================================
+  
+  LD.Config:
+    type_id: 0x20
+    description: "逻辑设备配置"
+    fields:
+      - name: PortID
+        type: u8
+        description: "端口ID"
+        
+      - name: LDID
+        type: u8
+        description: "逻辑设备ID"
+        
+      - name: LDType
+        type: u8
+        parser: enum
+        enum_type: ld_type_t
+        description: "逻辑设备类型"
+        
+      - name: DOE
+        type: bool
+        description: "是否支持DOE"
+        
+      - name: SecurityDOE
+        type: bool
+        description: "是否支持Security DOE"
+        
+      - name: Mailbox
+        type: bool
+        description: "是否支持Mailbox"
+    
+    alignment: 4
+
+  LD.Range:
+    type_id: 0x30
+    description: "逻辑设备范围配置"
+    fields:
+      - name: PortID
+        type: u8
+        description: "端口ID"
+        
+      - name: LDID
+        type: u8
+        description: "逻辑设备ID"
+        
+      - name: RangeID
+        type: u8
+        description: "范围ID"
+        
+      - name: Start_DPA
+        type: u64
+        parser: hex_string
+        description: "起始DPA地址（支持十六进制和下划线分隔）"
+        
+      - name: Length
+        type: u64
+        parser: size_string
+        description: "长度（支持GB/MB/KB/B后缀）"
+        
+      - name: DCD_Supported
+        type: bool
+        description: "是否支持DCD"
+        
+      - name: ShareModeEnable
+        type: bool
+        description: "是否启用共享模式"
+    
+    alignment: 4
+
+# ============================================================================
+# 字段类型说明
+# ============================================================================
+# 
+# 支持的字段类型:
+#   - u8:     1字节无符号整数
+#   - u16:    2字节无符号整数
+#   - u32:    4字节无符号整数
+#   - u64:    8字节无符号整数
+#   - bool:   布尔值，编码为1字节（0或1）
+#   - string: UTF-8字符串，定长，不足部分补0
+# 
+# 特殊解析器:
+#   - size_string:  解析容量字符串（如"512GB", "64MB"）
+#   - hex_string:   解析十六进制字符串（如"0x0000_0000_0000"）
+# 
+# 对齐:
+#   - alignment: 指定Value部分的字节对齐（通常为4字节）
+# 
+# ============================================================================
+# 添加新TLV类型的步骤
+# ============================================================================
+# 
+# 1. 在TLV_Schemas下添加新的类型定义
+# 2. 指定type_id（确保不与现有类型冲突）
+# 3. 定义fields列表，按照二进制编码顺序
+# 4. 为每个字段指定name、type，string类型需指定size
+# 5. 如需特殊解析，添加parser字段
+# 6. 指定alignment（通常为4）
+# 7. 无需修改Python代码，编码器会自动识别新类型
+# 
+# ============================================================================
+
