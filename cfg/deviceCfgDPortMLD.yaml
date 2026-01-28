@@ -1,0 +1,350 @@
+CXL_Type3_HDMH_Config:
+
+  # =========================
+  # Device Level TLVs
+  # =========================
+  - Type: Device.Basic
+    Enable: true
+    Value:
+      TotalDRAMCapacity: 512GB
+      DRAMShareable: true
+
+  - Type: Device.PortCapability
+    Enable: true
+    Value:
+      MaxPorts: 1
+
+  # =========================
+  # PCIe Port TLVs
+  # =========================
+  - Type: Port.Config
+    Enable: true
+    Value:
+      PortID: 0
+      EnablePort: true
+      PCIeSpeed: PCIE_SPEED_GEN5
+      PCIeWidth: PCIE_WIDTH_X16
+      LDMode: LD_MODE_MLD        # LD_MODE_SLD / LD_MODE_MLD
+
+  - Type: Port.Config
+    Enable: true
+    Value:
+      PortID: 1
+      EnablePort: true
+      PCIeSpeed: PCIE_SPEED_GEN5
+      PCIeWidth: PCIE_WIDTH_X16
+      LDMode: LD_MODE_MLD
+
+  # =========================
+  # Logical Device (LD) TLVs
+  # =========================
+  # ----- Port 0 : SLD (only one Regular LD) -----
+  # ----- Port 0 : Regular LD 0 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 1 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 2 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 3 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+
+  # ----- Port 0 : FM-LD -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0xf
+      LDType: LD_TYPE_FM_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 0 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 1 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 1
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 2 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 2
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 3 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 3
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+
+  # ----- Port 1 : FM-LD -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0xf
+      LDType: LD_TYPE_FM_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+
+  # =========================
+  # Regular LD Range TLVs
+  # =========================
+
+  # ----- Port 0 / LD 0 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 0 / LD 0 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 0 / LD 1 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 0 / LD 1 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 0 / LD 2 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 0 / LD 2 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 0 / LD 3 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 0 / LD 3 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 1 / LD 0 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 1 / LD 0 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 1 / LD 1 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 1
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 1 / LD 1 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 1
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 1 / LD 2 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 2
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 1 / LD 2 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 2
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+
+  # ----- Port 1 / LD 3 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 3
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: true
+      ShareModeEnable: true
+
+  # ----- Port 1 / LD 3 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 3
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 32GB
+      DCD_Supported: false
+      ShareModeEnable: false
+

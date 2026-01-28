@@ -123,7 +123,7 @@ TLV_Schemas:
       - name: Start_DPA
         type: u64
         parser: hex_string
-        description: "起始DPA地址（支持十六进制和下划线分隔）"
+        description: "起始DPA地址（支持十六进制和下划线分隔），SharedModeEnable的时候有效"
         
       - name: Length
         type: u64
@@ -136,7 +136,7 @@ TLV_Schemas:
         
       - name: ShareModeEnable
         type: bool
-        description: "是否启用共享模式"
+        description: "是否启用共享模式, 只有在DCD_Supported的时候有效"
     
     alignment: 4
 
