@@ -11,8 +11,10 @@
 - ✅ 自动类型推断（U8, U16, U32, U64）
 - ✅ 配置验证功能
 - ✅ 支持多种TLV类型（Device.Basic, Port.Config, LD.Config等）
-- ✅ Feature Bitmap支持（Dual-Port, MLD, DCD等）
+- ✅ Feature Bitmap自动检测（根据配置内容自动设置特性位）
+- ✅ Feature Bitmap手动覆盖支持（Dual-Port, MLD, DCD等）
 - ✅ 二进制文件转储功能（用于调试）
+- ✅ Schema驱动的TLV编码（易于扩展和维护）
 
 ## 目录结构
 
@@ -24,8 +26,10 @@ utilities/yaml_to_tlvbinary/
 ├── binary_header.py            # Binary Header管理模块
 ├── config_schema.py            # 配置Schema定义和验证
 ├── header_config_parser.py     # C头文件解析器
+├── feature_detector.py         # Feature Bitmap自动检测器
 ├── requirements.txt            # Python依赖
-└── README.md                   # 本文档
+├── README.md                   # 本文档
+└── FEATURE_DETECTION.md        # Feature Bitmap自动检测说明
 
 cfg/
 ├── device_config_header.h      # C头文件：版本号和Feature Bitmap定义
@@ -126,40 +130,70 @@ MLD                  bit1       0x02
 DCD                  bit2       0x04
 ```
 
-### 基本转换
+### 基本转换（自动检测Feature Bitmap）
 
 ```bash
 python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin
 ```
 
-### 显示详细信息
+**默认行为**：工具会自动分析配置文件内容，检测并设置适当的 Feature Bitmap。
+
+### 显示详细信息（包括自动检测过程）
 
 ```bash
 python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin -v
 ```
 
-### 自定义版本号和特性位图
+输出示例：
+```
+使用配置版本: 1
+使用Schema版本: 1
+Feature Bitmap检测模式: 自动检测
+
+开始自动检测 Feature Bitmap...
+  ✓ Dual-Port 特性检测到 (掩码: 0x00000001)
+  ✓ MLD 特性检测到 (掩码: 0x00000002)
+  ✓ DCD 特性检测到 (掩码: 0x00000004)
+
+自动检测到的 Feature Bitmap: 0x00000007
+启用的特性: Dual-Port, MLD, DCD
+```
+
+### Feature Bitmap 自动检测规则
+
+工具会根据以下规则自动检测特性：
+
+1. **Dual-Port**: 如果有 ≥2 个 Port.Config 的 Enable=true
+2. **MLD**: 如果任意一个 Port.Config 的 LDMode=LD_MODE_MLD 且 Enable=true
+3. **DCD**: 如果任意一个 LD.Range 的 DCD_Supported=true 且 Enable=true
+
+详细说明请参考 [`FEATURE_DETECTION.md`](FEATURE_DETECTION.md)
+
+### 手动指定 Feature Bitmap（覆盖自动检测）
+
+```bash
+# 手动指定特定的Feature Bitmap
+python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin \
+    --feature-bitmap 0x03
+```
+
+### 禁用自动检测（使用默认值）
+
+```bash
+# 使用cfg/device_config_header.h中的默认值
+python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin \
+    --no-auto-detect
+```
+
+### 自定义版本号
 
 ```bash
 python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin \
     --config-version 2 \
-    --schema-version 3 \
-    --feature-bitmap 0x07
+    --schema-version 3
 ```
 
-**注意**：如果不指定这些参数，工具会自动使用 `../../cfg/device_config_header.h` 中定义的默认值。
-
-### 启用特定特性
-
-```bash
-# 启用Dual-Port特性
-python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin \
-    --feature-bitmap 0x01
-
-# 启用Dual-Port和MLD特性
-python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_config.bin \
-    --feature-bitmap 0x03
-```
+**注意**：版本号默认从 `../../cfg/device_config_header.h` 读取。
 
 ### 转储二进制文件（调试）
 
@@ -180,12 +214,13 @@ python yaml_to_binary.py -i ../../cfg/deviceCfg.yaml -o ../../output/device_conf
 | `-i, --input` | 输入YAML配置文件路径 |
 | `-o, --output` | 输出二进制文件路径 |
 | `-d, --dump` | 转储二进制文件内容（用于调试） |
-| `-v, --verbose` | 显示详细信息 |
+| `-v, --verbose` | 显示详细信息（包括自动检测过程） |
 | `--no-validate` | 跳过配置验证 |
 | `--list-features` | 列出所有定义的特性位 |
 | `--config-version` | 配置版本号（默认：从cfg/device_config_header.h读取） |
 | `--schema-version` | Schema版本号（默认：从cfg/device_config_header.h读取） |
-| `--feature-bitmap` | 特性位图（默认：从cfg/device_config_header.h读取，支持十六进制如0xFF） |
+| `--feature-bitmap` | 手动指定特性位图（覆盖自动检测，支持十六进制如0xFF） |
+| `--no-auto-detect` | 禁用Feature Bitmap自动检测，使用默认值 |
 
 ## YAML配置文件格式
 
@@ -301,11 +336,52 @@ C头文件解析器模块，负责解析 `cfg/device_config_header.h`。
 - `list_features()`: 列出所有定义的特性
 - `create_feature_bitmap(*names)`: 创建Feature Bitmap
 - `decode_feature_bitmap(bitmap)`: 解码Feature Bitmap
+- `get_enum_value(enum_type, name)`: 获取枚举值
 
 便捷函数：
 - `get_config_version()`: 获取默认配置版本号
 - `get_schema_version()`: 获取默认Schema版本号
 - `list_features()`: 列出所有特性
+
+### feature_detector.py
+
+Feature Bitmap 自动检测模块，根据配置文件内容自动分析并设置特性位。
+
+主要类：
+- `FeatureDetector`: Feature Bitmap自动检测器
+
+主要方法：
+- `detect_features(config_list, verbose)`: 检测配置中的特性
+- `get_feature_names(bitmap)`: 根据bitmap获取特性名称列表
+- `_detect_dual_port(config_list)`: 检测Dual-Port特性
+- `_detect_mld(config_list)`: 检测MLD特性
+- `_detect_dcd(config_list)`: 检测DCD特性
+
+检测规则：
+1. **Dual-Port**: 有 ≥2 个 Port.Config 的 Enable=true
+2. **MLD**: 任意 Port.Config 的 LDMode=LD_MODE_MLD 且 Enable=true
+3. **DCD**: 任意 LD.Range 的 DCD_Supported=true 且 Enable=true
+
+详细说明请参考 [`FEATURE_DETECTION.md`](FEATURE_DETECTION.md)
+
+### schema_driven_encoder.py
+
+Schema驱动的TLV编码器，基于 `cfg/tlv_schema.yaml` 定义的结构进行编码。
+
+主要类：
+- `SchemaDrivenEncoder`: Schema驱动的编码器
+
+主要方法：
+- `encode_config_list(config_list)`: 编码配置列表
+- `encode_config_item(item)`: 编码单个配置项
+- `encode_field(value, field_def)`: 编码字段
+- `parse_enum(value, enum_type)`: 解析枚举值
+
+优势：
+- 无需硬编码TLV结构
+- 易于添加新的TLV类型
+- 支持复杂的字段类型和解析器
+- 自动处理对齐和填充
 
 ## 示例输出
 

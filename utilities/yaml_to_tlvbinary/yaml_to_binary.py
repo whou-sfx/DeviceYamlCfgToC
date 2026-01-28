@@ -22,6 +22,7 @@ from schema_driven_encoder import SchemaDrivenEncoder
 from binary_header import BinaryHeader
 from config_schema import ConfigSchema
 from header_config_parser import get_parser, list_features
+from feature_detector import FeatureDetector
 
 
 class YamlToBinaryConverter:
@@ -29,17 +30,20 @@ class YamlToBinaryConverter:
     
     def __init__(self, config_version: Optional[int] = None, 
                  schema_version: Optional[int] = None,
-                 feature_bitmap: Optional[int] = None):
+                 feature_bitmap: Optional[int] = None,
+                 auto_detect_features: bool = True):
         """初始化转换器
         
         Args:
             config_version: 配置版本号，None则使用cfg/device_config_header.h中的默认值
             schema_version: Schema版本号，None则使用cfg/device_config_header.h中的默认值
             feature_bitmap: 特性位图，None则使用cfg/device_config_header.h中的默认值
+            auto_detect_features: 是否自动检测feature bitmap（默认True）
         """
         # 使用Schema驱动的编码器
         self.encoder = SchemaDrivenEncoder()  # 稍后会设置verbose
         self.header = BinaryHeader(config_version, schema_version, feature_bitmap)
+        self.auto_detect_features = auto_detect_features
         self.verbose = False
     
     def load_yaml(self, yaml_file: str) -> Dict[str, Any]:
@@ -122,6 +126,25 @@ class YamlToBinaryConverter:
         # 验证配置
         if validate:
             self.validate_config(config_list)
+        
+        # 自动检测 feature_bitmap（如果启用且未手动指定）
+        if self.auto_detect_features and self.header.feature_bitmap == 0:
+            if self.verbose:
+                print("开始自动检测 Feature Bitmap...")
+            
+            detector = FeatureDetector()
+            detected_bitmap, detection_results = detector.detect_features(config_list, verbose=self.verbose)
+            
+            if detected_bitmap != 0:
+                self.header.feature_bitmap = detected_bitmap
+                if self.verbose:
+                    print(f"\n自动检测到的 Feature Bitmap: 0x{detected_bitmap:08X}")
+                    feature_names = detector.get_feature_names(detected_bitmap)
+                    if feature_names:
+                        print(f"启用的特性: {', '.join(feature_names)}")
+                    print()
+            elif self.verbose:
+                print("未检测到任何特性，使用默认值 0x00000000\n")
         
         # 设置encoder的verbose标志
         self.encoder.verbose = self.verbose
@@ -218,18 +241,24 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  # 转换YAML到二进制
+  # 转换YAML到二进制（自动检测feature bitmap）
   %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin
   
-  # 转换并显示详细信息
+  # 转换并显示详细信息（包括自动检测过程）
   %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin -v
   
   # 转储二进制文件内容
   %(prog)s -d output/device_config.bin
   
-  # 自定义版本号和特性位图
+  # 手动指定feature bitmap（覆盖自动检测）
+  %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin --feature-bitmap 0x07
+  
+  # 禁用自动检测，使用默认值
+  %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin --no-auto-detect
+  
+  # 自定义版本号
   %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin \\
-           --config-version 2 --schema-version 3 --feature-bitmap 0xFF
+           --config-version 2 --schema-version 3
   
   # 列出可用的特性位定义
   %(prog)s --list-features
@@ -251,7 +280,9 @@ def main():
     parser.add_argument('--schema-version', type=int, default=None,
                         help=f'Schema版本号 (默认: {default_schema_version}, 来自cfg/device_config_header.h)')
     parser.add_argument('--feature-bitmap', type=lambda x: int(x, 0), default=None,
-                        help=f'特性位图 (默认: 0x{default_feature_bitmap:02X}, 支持十六进制如0xFF)')
+                        help=f'特性位图 (默认: 自动检测, 支持十六进制如0xFF)')
+    parser.add_argument('--no-auto-detect', action='store_true',
+                        help='禁用feature bitmap自动检测，使用默认值')
     parser.add_argument('--list-features', action='store_true',
                         help='列出cfg/device_config_header.h中定义的所有特性位')
     
@@ -301,7 +332,8 @@ def main():
     converter = YamlToBinaryConverter(
         config_version=args.config_version,
         schema_version=args.schema_version,
-        feature_bitmap=args.feature_bitmap
+        feature_bitmap=args.feature_bitmap,
+        auto_detect_features=not args.no_auto_detect
     )
     converter.verbose = args.verbose
     
@@ -309,14 +341,21 @@ def main():
     if args.verbose:
         print(f"使用配置版本: {converter.header.config_version}")
         print(f"使用Schema版本: {converter.header.schema_version}")
-        print(f"使用Feature Bitmap: 0x{converter.header.feature_bitmap:08X}")
-        if converter.header.feature_bitmap:
-            try:
-                features = get_parser().decode_feature_bitmap(converter.header.feature_bitmap)
-                if features:
-                    print(f"启用的特性: {', '.join(features)}")
-            except:
-                pass
+        
+        # 如果手动指定了feature_bitmap，显示它
+        if args.feature_bitmap is not None:
+            print(f"使用Feature Bitmap: 0x{converter.header.feature_bitmap:08X} (手动指定)")
+            if converter.header.feature_bitmap:
+                try:
+                    features = get_parser().decode_feature_bitmap(converter.header.feature_bitmap)
+                    if features:
+                        print(f"启用的特性: {', '.join(features)}")
+                except:
+                    pass
+        elif args.no_auto_detect:
+            print(f"使用Feature Bitmap: 0x{converter.header.feature_bitmap:08X} (默认值)")
+        else:
+            print(f"Feature Bitmap检测模式: 自动检测")
         print()
     
     try:
