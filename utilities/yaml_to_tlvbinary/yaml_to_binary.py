@@ -44,7 +44,7 @@ class YamlToBinaryConverter:
         self.encoder = SchemaDrivenEncoder()  # 稍后会设置verbose
         self.header = BinaryHeader(config_version, schema_version, feature_bitmap)
         self.auto_detect_features = auto_detect_features
-        self.verbose = False
+        self.verbose = 0  # 0=no verbose, 1=enabled only, 2=all
     
     def load_yaml(self, yaml_file: str) -> Dict[str, Any]:
         """加载YAML配置文件
@@ -59,7 +59,7 @@ class YamlToBinaryConverter:
             with open(yaml_file, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
             
-            if self.verbose:
+            if self.verbose > 0:
                 print(f"✓ 成功加载YAML文件: {yaml_file}")
             
             return config
@@ -86,7 +86,7 @@ class YamlToBinaryConverter:
         if not isinstance(config_list, list):
             raise ValueError(f"配置项必须是列表类型，但得到: {type(config_list)}")
         
-        if self.verbose:
+        if self.verbose > 0:
             print(f"✓ 提取到 {len(config_list)} 个配置项")
         
         return config_list
@@ -105,7 +105,7 @@ class YamlToBinaryConverter:
                 print(f"  {error}")
             raise ValueError("配置验证失败")
         
-        if self.verbose:
+        if self.verbose > 0:
             print("✓ 配置验证通过")
     
     def convert(self, yaml_file: str, output_file: str, 
@@ -129,7 +129,7 @@ class YamlToBinaryConverter:
         
         # 自动检测 feature_bitmap（如果启用且未手动指定）
         if self.auto_detect_features and self.header.feature_bitmap == 0:
-            if self.verbose:
+            if self.verbose > 0:
                 print("开始自动检测 Feature Bitmap...")
             
             detector = FeatureDetector()
@@ -137,34 +137,34 @@ class YamlToBinaryConverter:
             
             if detected_bitmap != 0:
                 self.header.feature_bitmap = detected_bitmap
-                if self.verbose:
+                if self.verbose > 0:
                     print(f"\n自动检测到的 Feature Bitmap: 0x{detected_bitmap:08X}")
                     feature_names = detector.get_feature_names(detected_bitmap)
                     if feature_names:
                         print(f"启用的特性: {', '.join(feature_names)}")
                     print()
-            elif self.verbose:
+            elif self.verbose > 0:
                 print("未检测到任何特性，使用默认值 0x00000000\n")
         
         # 设置encoder的verbose标志
         self.encoder.verbose = self.verbose
         
         # 编码TLV数据
-        if self.verbose:
+        if self.verbose > 0:
             print("正在编码TLV数据...")
         
         tlv_data = self.encoder.encode_config_list(config_list)
         
-        if self.verbose:
+        if self.verbose > 0:
             print(f"✓ TLV数据编码完成，大小: {len(tlv_data)} 字节")
         
         # 生成Header
-        if self.verbose:
+        if self.verbose > 0:
             print("正在生成Header...")
         
         header_data = self.header.pack_with_crc(tlv_data)
         
-        if self.verbose:
+        if self.verbose > 0:
             print(f"✓ Header生成完成")
             print(self.header)
         
@@ -178,7 +178,7 @@ class YamlToBinaryConverter:
         
         total_size = len(header_data) + len(tlv_data)
         
-        if self.verbose:
+        if self.verbose > 0:
             print(f"✓ 成功写入输出文件: {output_file}")
             print(f"  - Header大小: {len(header_data)} 字节")
             print(f"  - TLV数据大小: {len(tlv_data)} 字节")
@@ -244,8 +244,11 @@ def main():
   # 转换YAML到二进制（自动检测feature bitmap）
   %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin
   
-  # 转换并显示详细信息（包括自动检测过程）
+  # 转换并显示启用的TLV信息
   %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin -v
+  
+  # 转换并显示所有TLV信息（包括禁用的）
+  %(prog)s -i cfg/deviceCfg.yaml -o output/device_config.bin -vv
   
   # 转储二进制文件内容
   %(prog)s -d output/device_config.bin
@@ -271,8 +274,8 @@ def main():
                         help='输出二进制文件路径')
     parser.add_argument('-d', '--dump', type=str,
                         help='转储二进制文件内容（用于调试）')
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='显示详细信息')
+    parser.add_argument('-v', '--verbose', action='count', default=0,
+                        help='显示详细信息 (-v: 仅显示启用的TLV, -vv: 显示所有TLV)')
     parser.add_argument('--no-validate', action='store_true',
                         help='跳过配置验证')
     parser.add_argument('--config-version', type=int, default=None,
@@ -314,7 +317,7 @@ def main():
     # 转储模式
     if args.dump:
         converter = YamlToBinaryConverter()
-        converter.verbose = True
+        converter.verbose = 2  # 转储模式使用最详细的输出
         try:
             converter.dump_binary(args.dump)
             return 0
@@ -338,7 +341,7 @@ def main():
     converter.verbose = args.verbose
     
     # 如果是verbose模式，显示使用的版本信息
-    if args.verbose:
+    if args.verbose > 0:
         print(f"使用配置版本: {converter.header.config_version}")
         print(f"使用Schema版本: {converter.header.schema_version}")
         
@@ -365,14 +368,14 @@ def main():
             validate=not args.no_validate
         )
         
-        if not args.verbose:
+        if args.verbose == 0:
             print(f"✓ 转换成功: {args.output}")
         
         return 0
     
     except Exception as e:
         print(f"错误: {e}", file=sys.stderr)
-        if args.verbose:
+        if args.verbose > 0:
             import traceback
             traceback.print_exc()
         return 1

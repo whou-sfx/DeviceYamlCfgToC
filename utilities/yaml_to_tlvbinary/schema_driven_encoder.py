@@ -23,12 +23,12 @@ class SchemaDrivenEncoder:
     实现通用的编码逻辑，无需为每种TLV类型编写专门的编码方法。
     """
     
-    def __init__(self, schema_file: str = None, verbose: bool = False):
+    def __init__(self, schema_file: str = None, verbose: int = 0):
         """初始化编码器
         
         Args:
             schema_file: TLV Schema YAML文件路径，None则使用默认路径
-            verbose: 是否输出详细日志
+            verbose: 详细输出级别 (0=无, 1=仅启用项, 2=所有项)
         """
         self.verbose = verbose
         
@@ -291,11 +291,30 @@ class SchemaDrivenEncoder:
         enable = config_item.get('Enable', True)
         
         # 如果verbose模式，打印TLV信息
-        if self.verbose:
-            enable_str = '启用' if enable else '禁用'
-            print(f"编码TLV: {tlv_type_str} (Enable={enable_str})")
-            for key, val in value.items():
-                print(f"  {key}: {val}")
+        # verbose=1: 只打印启用的项
+        # verbose=2: 打印所有项
+        if self.verbose > 0:
+            if self.verbose == 1 and not enable:
+                # Level 1: skip disabled items
+                pass
+            else:
+                # Level 1 (enabled only) or Level 2 (all items)
+                enable_str = '启用' if enable else '禁用'
+                print(f"编码TLV: {tlv_type_str} (Enable={enable_str})")
+                
+                # Get schema to check field parsers for proper formatting
+                schema = self.type_map.get(tlv_type_str, {})
+                field_defs = schema.get('fields', [])
+                field_parser_map = {field['name']: field.get('parser') for field in field_defs}
+                
+                for key, val in value.items():
+                    # Check if this field uses hex_string parser
+                    parser = field_parser_map.get(key)
+                    if parser == 'hex_string' and isinstance(val, int):
+                        # Display as hex for hex_string fields
+                        print(f"  {key}: 0x{val:X}")
+                    else:
+                        print(f"  {key}: {val}")
         
         # 获取Schema
         if tlv_type_str not in self.type_map:
@@ -311,9 +330,12 @@ class SchemaDrivenEncoder:
         tlv_data = self.encode_tlv(type_id, value_data, enable)
         
         # 如果verbose模式，打印TLV大小信息
-        if self.verbose:
-            enable_val = 1 if enable else 0
-            print(f"  → TLV大小: {len(tlv_data)}字节 (Type=0x{type_id:02X}, Enable={enable_val}, Length={len(value_data)})")
+        if self.verbose > 0:
+            if self.verbose == 1 and not enable:
+                pass  # Skip disabled items at level 1
+            else:
+                enable_val = 1 if enable else 0
+                print(f"  → TLV大小: {len(tlv_data)}字节 (Type=0x{type_id:02X}, Enable={enable_val}, Length={len(value_data)})")
         
         return tlv_data
     
@@ -330,19 +352,27 @@ class SchemaDrivenEncoder:
         """
         data = bytearray()
         
-        if self.verbose:
-            print(f"\n开始编码 {len(config_list)} 个配置项...")
+        if self.verbose > 0:
+            total_items = len(config_list)
+            if self.verbose == 1:
+                enabled_count = sum(1 for item in config_list if item.get('Enable', True))
+                print(f"\n开始编码 {total_items} 个配置项 (显示 {enabled_count} 个启用项)...")
+            else:
+                print(f"\n开始编码 {total_items} 个配置项...")
             print("=" * 70)
         
         for i, config_item in enumerate(config_list):
-            if self.verbose:
-                print(f"\n[{i+1}/{len(config_list)}] ", end="")
+            if self.verbose > 0:
+                # Only print item number if we're going to show this item
+                enable = config_item.get('Enable', True)
+                if self.verbose == 2 or (self.verbose == 1 and enable):
+                    print(f"\n[{i+1}/{len(config_list)}] ", end="")
             
             # 编码所有配置项，无论Enable是true还是false
             tlv_data = self.encode_config_item(config_item)
             data.extend(tlv_data)
         
-        if self.verbose:
+        if self.verbose > 0:
             print("\n" + "=" * 70)
         
         return bytes(data)
