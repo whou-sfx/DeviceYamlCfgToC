@@ -1,6 +1,14 @@
 # TLV结构Schema定义
 # 此文件定义了所有TLV类型的结构，用于Schema驱动的编码器
 # 添加新的TLV类型只需在此文件中添加定义，无需修改Python代码
+# 
+# 使用平铺TLV结构描述层级关系，其基本语义结构为
+# 1个 Device 包含1个或最多2个Port
+# Port 配置为SLD模式时，仅包含一个Regular LD
+# Port 配置为MLD模式时，包含1个FM-LD 和 1到4个 Regular LDs
+# Regular LD 包含1个或最多2个Ranges
+# FM-LD 不包含Range
+# 所有TLV 结构都应该在yaml中定义，通过Enable属性来控制是否启用
 
 TLV_Schemas:
   # ============================================================================
