@@ -12,7 +12,7 @@ CXL_Type3_HDMH_Config:
   - Type: Device.PortCapability
     Enable: true
     Value:
-      MaxPorts: 1
+      MaxPorts: 2
 
   # =========================
   # PCIe Port TLVs

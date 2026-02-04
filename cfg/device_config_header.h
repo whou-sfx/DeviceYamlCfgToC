@@ -11,6 +11,13 @@
 
 #include <stdint.h>
 
+#define MAX_PORTS 2
+#define MAX_LD_PER_PORT 4
+#define MAX_FM_LD_PER_PORT 1
+#define MAX_REGULAR_LD_PER_PORT 4
+#define MAX_RANGE_PER_REGULAR_LD 2
+
+
 /*============================================================================
  * Header结构定义
  *============================================================================*/
