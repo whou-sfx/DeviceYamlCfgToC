@@ -8,8 +8,10 @@ from .type_mapper import CTypeMapper
 
 
 class ParserGenerator:
-    def __init__(self, schemas: Dict[str, dict]):
+    def __init__(self, schemas: Dict[str, dict], hierarchy: dict = None):
         self.schemas = schemas
+        self.hierarchy = hierarchy or {}
+        self.node_locator = NodeLocator(hierarchy)
 
     def _map_func_name(self, tlv_name: str) -> str:
         return "map_" + tlv_name.lower().replace(".", "_")
@@ -85,7 +87,7 @@ class ParserGenerator:
 
     def _emit_map_function(self, tlv_name: str, schema: dict) -> List[str]:
         func_name = self._map_func_name(tlv_name)
-        locator = NodeLocator.get_locator(tlv_name)
+        locator = self.node_locator.get_locator(tlv_name)
         fields = schema.get("fields", [])
         lines: List[str] = [
             f"static void {func_name}(const uint8_t *buf, const tlv_index_t *idx, device_semantic_t *sem)",

@@ -5,18 +5,30 @@ from typing import Dict, List
 
 class NodeLocator:
     """根据TLV类型生成节点定位代码片段。"""
+    
+    def __init__(self, hierarchy: dict = None):
+        self.hierarchy = hierarchy or {}
+        self.device_tlvs = self.hierarchy.get('Device_Level_TLVs', [])
 
-    @staticmethod
-    def get_locator(tlv_name: str) -> Dict[str, List[str]]:
-        if tlv_name == "Device.Basic":
+    def _get_device_field_name(self, tlv_name: str) -> str:
+        """从 hierarchy 配置中获取 device_semantic_t 的字段名"""
+        structures = self.hierarchy.get('Structures', [])
+        for struct in structures:
+            if struct['name'] == 'device_semantic_t':
+                for field in struct['fields']:
+                    if field.get('from_tlv') == tlv_name:
+                        return field['name']
+        # 如果找不到，返回默认转换
+        return tlv_name.lower().replace(".", "_")
+
+    def get_locator(self, tlv_name: str) -> Dict[str, List[str]]:
+        # 动态判断是否为 Device 级 TLV
+        if tlv_name in self.device_tlvs:
+            node_type = self._node_struct_name(tlv_name)
+            field_name = self._get_device_field_name(tlv_name)
             return {
-                "node_type": "device_basic_node_t",
-                "pre_lines": ["device_basic_node_t *p = &sem->device_basic;"],
-            }
-        if tlv_name == "Device.PortCapability":
-            return {
-                "node_type": "device_port_capability_node_t",
-                "pre_lines": ["device_port_capability_node_t *p = &sem->device_port_capability;"],
+                "node_type": node_type,
+                "pre_lines": [f"{node_type} *p = &sem->{field_name};"],
             }
         if tlv_name == "Port.Config":
             return {
@@ -97,5 +109,11 @@ class NodeLocator:
                 ],
             }
         raise KeyError(f"Unsupported TLV name for locator: {tlv_name}")
+    
+    def _node_struct_name(self, tlv_name: str) -> str:
+        """TLV名称转结构体类型名"""
+        if tlv_name == "Device.PortCapability":
+            return "device_port_capability_node_t"
+        return tlv_name.lower().replace(".", "_") + "_node_t"
 
 

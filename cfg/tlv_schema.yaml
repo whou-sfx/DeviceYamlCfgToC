@@ -181,3 +181,82 @@ TLV_Schemas:
 # 
 # ============================================================================
 
+# ============================================================================
+# 层级结构定义 (Hierarchy Configuration)
+# ============================================================================
+# 定义TLV之间的组织关系和语义结构，用于自动生成C语义结构代码
+
+Hierarchy:
+  # Device级别的TLV列表（直接挂载在device_semantic_t下的TLV）
+  Device_Level_TLVs:
+    - Device.Basic
+    - Device.PortCapability
+  
+  # 层级结构定义
+  Structures:
+    # Regular LD 结构
+    - name: regular_ld_t
+      description: "常规逻辑设备结构"
+      fields:
+        - name: config
+          type: ld_config_node_t
+          from_tlv: LD.Config
+        - name: range
+          type: ld_range_node_t
+          from_tlv: LD.Range
+          array: MAX_RANGE_PER_REGULAR_LD
+        - name: range_count
+          type: uint8_t
+    
+    # FM LD 结构
+    - name: fm_ld_t
+      description: "Fabric Manager逻辑设备结构"
+      fields:
+        - name: config
+          type: ld_config_node_t
+          from_tlv: LD.Config
+    
+    # Port 结构
+    - name: port_t
+      description: "端口结构"
+      fields:
+        - name: config
+          type: port_config_node_t
+          from_tlv: Port.Config
+        - name: regular_ld
+          type: regular_ld_t
+          array: MAX_REGULAR_LD_PER_PORT
+        - name: regular_ld_count
+          type: uint8_t
+        - name: fm_ld
+          type: fm_ld_t
+          array: MAX_FM_LD_PER_PORT
+        - name: fm_ld_count
+          type: uint8_t
+    
+    # Device 语义结构（顶层）
+    - name: device_semantic_t
+      description: "设备语义结构（顶层）"
+      fields:
+        - name: tlv_binary
+          type: uint8_t*
+        - name: tlv_binary_length
+          type: uint16_t
+        - name: global_dirty
+          type: uint8_t
+        - name: device_basic
+          type: device_basic_node_t
+          from_tlv: Device.Basic
+        - name: device_port_capability
+          type: device_port_capability_node_t
+          from_tlv: Device.PortCapability
+        - name: port
+          type: port_t
+          array: MAX_PORTS
+        - name: port_count
+          type: uint8_t
+        - name: parse_success
+          type: uint8_t
+        - name: total_tlv_count
+          type: uint16_t
+
