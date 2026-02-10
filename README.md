@@ -356,15 +356,11 @@ TLV_Schemas:
 6. 版本号和特性位图的默认值定义在`cfg/device_config_header.h`中
 7. TLV结构定义在`cfg/device_config_header.h`中，可用于固件C代码
 
-## 许可证
+## U32/u64 访问对齐问题
+tlv_binary中，存在一些U64/U32类型的属性对应的值，如果直接struct解析，会造成总线非对齐访问，
+在EL2 CPU总线访问中必然会出发异常。当前方案不存在这种问题，解决的策略为对于U32/U64是通过逐个
+字节拼接来读写的。tlv_parser.c 里可以看到对 Start_DPA/Length 都是 ((uint64_t)v[i] << ...) 的形式）
+semantic_write_field() 也是按字节写回。
+**所以“规避”的关键是：不要在任何地方把 TLV value 当成 packed struct 直接解引用。**
 
-本项目为内部工具，请遵循项目许可证。
-
-## 贡献
-
-欢迎提交问题和改进建议。
-
-## 联系方式
-
-如有问题，请联系项目维护者。
 
