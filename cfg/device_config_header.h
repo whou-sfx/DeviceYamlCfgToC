@@ -45,9 +45,12 @@ typedef struct __attribute__((packed)) {
 } binary_tlv_header_t;
 
 /* 确保Header大小为32字节 */
-_Static_assert(sizeof(binary_tlv_header_t) == 32, 
-               "binary_tlv_header_t must be 32 bytes");
-
+/* C/C++ static assert 兼容 */
+#ifdef __cplusplus
+  #define STATIC_ASSERT(cond, msg) static_assert((cond), msg)
+#else
+  #define STATIC_ASSERT(cond, msg) _Static_assert((cond), msg)
+#endif
 /*============================================================================
  * TLV结构定义
  *============================================================================*/

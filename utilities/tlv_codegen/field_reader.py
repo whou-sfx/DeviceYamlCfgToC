@@ -56,7 +56,7 @@ class FieldReader:
         field_type = CTypeMapper.field_type(yaml_type)
         return (
             f"{target_ptr}->fd_{field_name} = (field_descriptor_t){{"
-            f" .offset = {base_offset_var} + {offset},"
+            f" .offset = (uint16_t)({base_offset_var} + {offset}),"
             f" .type = {field_type},"
             f" .present = 1 }};"
         )

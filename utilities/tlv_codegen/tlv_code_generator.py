@@ -39,7 +39,7 @@ class TLVCodeGenerator:
 
         (output_path / "tlv_semantic.h").write_text(struct_gen.generate(), encoding="utf-8")
         (output_path / "tlv_parser.h").write_text(parser_gen.generate_header(), encoding="utf-8")
-        (output_path / "tlv_parser.c").write_text(parser_gen.generate_source(), encoding="utf-8")
+        (output_path / "tlv_parser.cpp").write_text(parser_gen.generate_source(), encoding="utf-8")
 
 
 

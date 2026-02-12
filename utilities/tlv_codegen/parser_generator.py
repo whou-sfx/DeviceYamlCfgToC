@@ -21,13 +21,17 @@ class ParserGenerator:
             "/*",
             " * 自动生成文件，请勿手动编辑。",
             " */",
-            "#ifndef TLV_PARSER_H",
-            "#define TLV_PARSER_H",
-            "",
-            "#include <stdint.h>",
+            "#ifndef __TLV_PARSER_H__",
+            "#define __TLV_PARSER_H__",
             "",
             "#include \"tlv_semantic.h\"",
+            "#ifdef __SMOKE_TEST__",
+            "#include <stdint.h>",
+            "",
             "#include \"../../cfg/device_config_header.h\"",
+            "#else",
+            "#include \"device_config_header.h\"",
+            "#endif",
             "",
             "#define MAX_TLV_COUNT 128",
             "",
@@ -45,7 +49,7 @@ class ParserGenerator:
             "int semantic_write_field(device_semantic_t *sem, const field_descriptor_t *fd, uint64_t value);",
             "int semantic_read_field(const device_semantic_t *sem, const field_descriptor_t *fd, uint64_t *value);",
             "",
-            "#endif /* TLV_PARSER_H */",
+            "#endif /* __TLV_PARSER_H__ */",
             "",
         ]
         return "\n".join(lines)
@@ -63,10 +67,10 @@ class ParserGenerator:
                     [
                         f"if (len >= {offset + max_len}) {{",
                         f"    memcpy(p->{name}, v + {offset}, {max_len});",
-                        f"    p->fd_{name} = (field_descriptor_t){{ .offset = base + {offset}, .type = FIELD_TYPE_U8, .present = 1 }};",
+                        f"    p->fd_{name} = (field_descriptor_t){{ .offset = (uint16_t)(base + {offset}), .type = FIELD_TYPE_U8, .present = 1 }};",
                         "} else {",
                         f"    memset(p->{name}, 0, {max_len});",
-                        f"    p->fd_{name} = (field_descriptor_t){{ .offset = base + {offset}, .type = FIELD_TYPE_U8, .present = 0 }};",
+                        f"    p->fd_{name} = (field_descriptor_t){{ .offset = (uint16_t)(base + {offset}), .type = FIELD_TYPE_U8, .present = 0 }};",
                         "}",
                     ]
                 )
@@ -79,7 +83,7 @@ class ParserGenerator:
             )
             lines.append("} else {")
             lines.append(
-                f"    p->fd_{name} = (field_descriptor_t){{ .offset = base + {offset}, .type = {CTypeMapper.field_type(ftype)}, .present = 0 }};"
+                f"    p->fd_{name} = (field_descriptor_t){{ .offset = (uint16_t)(base + {offset}), .type = {CTypeMapper.field_type(ftype)}, .present = 0 }};"
             )
             lines.append("}")
             offset += size

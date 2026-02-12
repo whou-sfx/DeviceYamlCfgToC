@@ -75,9 +75,9 @@ EMBED_SRC_REL="output/test_dmld.bin"
 cd "${PROJECT_ROOT}"
 ld -r -b binary -o "${EMBED_OBJ}" "${EMBED_SRC_REL}"
 
-gcc -std=c11 -Wall -Wextra -I"${PROJECT_ROOT}" \
+g++ -Wall -Wextra -D__SMOKE_TEST__=1 -I"${PROJECT_ROOT}" \
   "${PROJECT_ROOT}/src/test/test_tlv_parser.c" \
-  "${PROJECT_ROOT}/src/lib/tlv_parser.c" \
+  "${PROJECT_ROOT}/src/lib/tlv_parser.cpp" \
   "${EMBED_OBJ}" \
   -fno-pie -no-pie \
   -o "${TEST_EXE}"

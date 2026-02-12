@@ -150,13 +150,17 @@ class StructGenerator:
             "/*",
             " * 自动生成文件，请勿手动编辑。",
             " */",
-            "#ifndef TLV_SEMANTIC_H",
-            "#define TLV_SEMANTIC_H",
+            "#ifndef __TLV_SEMANTIC_H__",
+            "#define __TLV_SEMANTIC_H__",
             "",
+            "#ifdef __SMOKE_TEST__",
             "#include <stdint.h>",
             "#include <string.h>",
             "",
             "#include \"../../cfg/device_config_header.h\"",
+            "#else",
+            "#include \"device_config_header.h\"",
+            "#endif",
             "",
             "typedef enum {",
             "    FIELD_TYPE_U8   = 0,",
@@ -199,7 +203,7 @@ class StructGenerator:
         lines.extend(self._generate_macros())
         
         lines.extend([
-            "#endif /* TLV_SEMANTIC_H */",
+            "#endif /* __TLV_SEMANTIC_H__ */",
             "",
         ])
 
