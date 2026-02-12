@@ -7,6 +7,19 @@
 
 #include "../lib/tlv_parser.h"
 
+/*
+ * 通过 linker 把 output/test_dmld.bin 以只读数据段形式嵌入可执行文件。
+ *
+ * 生成方式示例（由 run_verification.sh 负责）：
+ *   ld -r -b binary -o output/test_dmld_bin.o output/test_dmld.bin
+ *
+ * ld 会自动导出如下符号（路径分隔符/点号会替换为下划线）：
+ *   _binary_output_test_dmld_bin_start
+ *   _binary_output_test_dmld_bin_end
+ */
+extern const unsigned char _binary_output_test_dmld_bin_start[];
+extern const unsigned char _binary_output_test_dmld_bin_end[];
+
 static int load_file(const char *path, uint8_t **out_buf, uint16_t *out_len)
 {
     FILE *fp = fopen(path, "rb");
@@ -42,18 +55,46 @@ static int load_file(const char *path, uint8_t **out_buf, uint16_t *out_len)
     return 0;
 }
 
+static int load_embedded_default(uint8_t **out_buf, uint16_t *out_len)
+{
+    const unsigned char *start = _binary_output_test_dmld_bin_start;
+    const unsigned char *end = _binary_output_test_dmld_bin_end;
+    size_t size = (size_t)(end - start);
+
+    if (size == 0 || size > 0xFFFF) {
+        return -1;
+    }
+
+    uint8_t *buf = (uint8_t *)malloc(size);
+    if (!buf) {
+        return -1;
+    }
+    memcpy(buf, start, size);
+
+    *out_buf = buf;
+    *out_len = (uint16_t)size;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
-    const char *path = (argc > 1) ? argv[1] : "../../output/whou_dmld.bin";
+    const char *path = (argc > 1) ? argv[1] : "<embedded:output/test_dmld.bin>";
     uint8_t *buffer = NULL;
     uint16_t length = 0;
     
     printf("=== TLV Parser Test ===\n");
     printf("Binary file: %s\n", path);
-    
-    if (load_file(path, &buffer, &length) != 0) {
-        fprintf(stderr, "无法读取测试文件: %s\n", path);
-        return 1;
+
+    if (argc > 1) {
+        if (load_file(path, &buffer, &length) != 0) {
+            fprintf(stderr, "无法读取测试文件: %s\n", path);
+            return 1;
+        }
+    } else {
+        if (load_embedded_default(&buffer, &length) != 0) {
+            fprintf(stderr, "无法加载内嵌默认测试文件: output/test_dmld.bin\n");
+            return 1;
+        }
     }
     printf("Binary size: %u bytes\n\n", length);
 

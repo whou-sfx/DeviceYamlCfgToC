@@ -65,9 +65,21 @@ python3 -m utilities.tlv_codegen.generate_tlv_parser \
 say ""
 
 say "== [4] Build test executable =="
+say "Embedding default binary: ${OUTPUT_BIN}"
+EMBED_OBJ="${OUTPUT_DIR}/test_dmld_bin.o"
+# 注意：ld 生成的符号名会基于“输入文件名”派生。
+# 这里必须使用相对路径 output/test_dmld.bin，保证符号名稳定为：
+#   _binary_output_test_dmld_bin_start/_end
+EMBED_SRC_REL="output/test_dmld.bin"
+[[ -f "${PROJECT_ROOT}/${EMBED_SRC_REL}" ]] || die "找不到要嵌入的默认bin: ${PROJECT_ROOT}/${EMBED_SRC_REL}"
+cd "${PROJECT_ROOT}"
+ld -r -b binary -o "${EMBED_OBJ}" "${EMBED_SRC_REL}"
+
 gcc -std=c11 -Wall -Wextra -I"${PROJECT_ROOT}" \
   "${PROJECT_ROOT}/src/test/test_tlv_parser.c" \
   "${PROJECT_ROOT}/src/lib/tlv_parser.c" \
+  "${EMBED_OBJ}" \
+  -fno-pie -no-pie \
   -o "${TEST_EXE}"
 say "Built: ${TEST_EXE}"
 say ""
