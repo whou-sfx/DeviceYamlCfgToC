@@ -25,6 +25,7 @@ CXL_Type3_HDMH_Config:
       PCIeSpeed: PCIE_SPEED_GEN5
       PCIeWidth: PCIE_WIDTH_X16
       LDMode: LD_MODE_MLD        # LD_MODE_SLD / LD_MODE_MLD
+      DCD_Supported: false
 
   - Type: Port.Config
     Enable: false
@@ -34,6 +35,7 @@ CXL_Type3_HDMH_Config:
       PCIeSpeed: PCIE_SPEED_GEN5
       PCIeWidth: PCIE_WIDTH_X16
       LDMode: LD_MODE_SLD
+      DCD_Supported: false
 
   # =========================
   # Logical Device (LD) TLVs
@@ -89,7 +91,7 @@ CXL_Type3_HDMH_Config:
     Enable: true
     Value:
       PortID: 0
-      LDID: 0xf
+      LDID: 0xffff
       LDType: LD_TYPE_FM_LD
       DOE: true
       SecurityDOE: true
@@ -156,7 +158,7 @@ CXL_Type3_HDMH_Config:
     Enable: false
     Value:
       PortID: 0
-      LDID: 0xf
+      LDID: 0xffff
       LDType: LD_TYPE_FM_LD
       DOE: true
       SecurityDOE: true
@@ -176,8 +178,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 0 / LD 0 / Range 1 -----
   - Type: LD.Range
@@ -188,8 +188,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 0 / LD 1 / Range 0 -----
   - Type: LD.Range
@@ -200,8 +198,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 0 / LD 1 / Range 1 -----
   - Type: LD.Range
@@ -212,8 +208,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 0 / LD 2 / Range 0 -----
   - Type: LD.Range
@@ -224,8 +218,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 0 / LD 2 / Range 1 -----
   - Type: LD.Range
@@ -236,8 +228,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 0 / LD 3 / Range 0 -----
   - Type: LD.Range
@@ -248,8 +238,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 0 / LD 3 / Range 1 -----
   - Type: LD.Range
@@ -260,8 +248,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 64GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 1 / LD 0 / Range 0 -----
   - Type: LD.Range
@@ -272,8 +258,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 1 / LD 0 / Range 1 -----
   - Type: LD.Range
@@ -284,8 +268,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 1 / LD 1 / Range 0 -----
   - Type: LD.Range
@@ -296,8 +278,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 1 / LD 1 / Range 1 -----
   - Type: LD.Range
@@ -308,8 +288,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 1 / LD 2 / Range 0 -----
   - Type: LD.Range
@@ -320,8 +298,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 1 / LD 2 / Range 1 -----
   - Type: LD.Range
@@ -332,8 +308,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: false
-      ShareModeEnable: false
 
   # ----- Port 1 / LD 3 / Range 0 -----
   - Type: LD.Range
@@ -344,8 +318,6 @@ CXL_Type3_HDMH_Config:
       RangeID: 0
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: true
-      ShareModeEnable: true
 
   # ----- Port 1 / LD 3 / Range 1 -----
   - Type: LD.Range
@@ -356,6 +328,200 @@ CXL_Type3_HDMH_Config:
       RangeID: 1
       Start_DPA: 0x0
       Length: 0GB
-      DCD_Supported: false
-      ShareModeEnable: false
+
+  # =========================
+  # Dynamic Capacity Region TLVs (Disabled)
+  # =========================
+
+  # ----- Port 0 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
 

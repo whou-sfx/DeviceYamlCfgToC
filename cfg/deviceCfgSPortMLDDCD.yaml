@@ -12,7 +12,7 @@ CXL_Type3_HDMH_Config:
   - Type: Device.PortCapability
     Enable: true
     Value:
-      MaxPorts: 2
+      MaxPorts: 1
 
   # =========================
   # PCIe Port TLVs
@@ -24,11 +24,11 @@ CXL_Type3_HDMH_Config:
       EnablePort: true
       PCIeSpeed: PCIE_SPEED_GEN5
       PCIeWidth: PCIE_WIDTH_X16
-      LDMode: LD_MODE_SLD        # LD_MODE_SLD / LD_MODE_MLD
-      DCD_Supported: false
+      LDMode: LD_MODE_MLD        # LD_MODE_SLD / LD_MODE_MLD
+      DCD_Supported: true
 
   - Type: Port.Config
-    Enable: true
+    Enable: false
     Value:
       PortID: 1
       EnablePort: true
@@ -49,10 +49,66 @@ CXL_Type3_HDMH_Config:
       LDID: 0
       LDType: LD_TYPE_REGULAR_LD
       DOE: true
-      SecurityDOE: true
+      SecurityDOE: false
       Mailbox: true
 
   # ----- Port 0 : Regular LD 1 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 2 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 3 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: false
+      Mailbox: true
+
+
+  # ----- Port 0 : FM-LD -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0xffff
+      LDType: LD_TYPE_FM_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 1 : Disabled -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 0 -----
   - Type: LD.Config
     Enable: false
     Value:
@@ -63,7 +119,7 @@ CXL_Type3_HDMH_Config:
       SecurityDOE: false
       Mailbox: true
 
-  # ----- Port 0 : Regular LD 2 -----
+  # ----- Port 1 : Regular LD 1 -----
   - Type: LD.Config
     Enable: false
     Value:
@@ -74,7 +130,7 @@ CXL_Type3_HDMH_Config:
       SecurityDOE: false
       Mailbox: true
 
-  # ----- Port 0 : Regular LD 3 -----
+  # ----- Port 1 : Regular LD 2 -----
   - Type: LD.Config
     Enable: false
     Value:
@@ -85,57 +141,11 @@ CXL_Type3_HDMH_Config:
       SecurityDOE: false
       Mailbox: true
 
-
-  # ----- Port 0 : FM-LD -----
-  - Type: LD.Config
-    Enable: false
-    Value:
-      PortID: 0
-      LDID: 0xffff
-      LDType: LD_TYPE_FM_LD
-      DOE: true
-      SecurityDOE: true
-      Mailbox: true
-
-  # ----- Port 1 : SLD (only one Regular LD) -----
-  # ----- Port 1 : Regular LD 0 -----
-  - Type: LD.Config
-    Enable: true
-    Value:
-      PortID: 1
-      LDID: 0
-      LDType: LD_TYPE_REGULAR_LD
-      DOE: true
-      SecurityDOE: true
-      Mailbox: true
-
-  # ----- Port 1 : Regular LD 1 -----
-  - Type: LD.Config
-    Enable: false
-    Value:
-      PortID: 1
-      LDID: 1
-      LDType: LD_TYPE_REGULAR_LD
-      DOE: false
-      SecurityDOE: false
-      Mailbox: true
-
-  # ----- Port 1 : Regular LD 2 -----
-  - Type: LD.Config
-    Enable: false
-    Value:
-      PortID: 1
-      LDID: 2
-      LDType: LD_TYPE_REGULAR_LD
-      DOE: false
-      SecurityDOE: false
-      Mailbox: true
-
   # ----- Port 1 : Regular LD 3 -----
   - Type: LD.Config
     Enable: false
     Value:
-      PortID: 1
+      PortID: 0
       LDID: 3
       LDType: LD_TYPE_REGULAR_LD
       DOE: false
@@ -147,7 +157,7 @@ CXL_Type3_HDMH_Config:
   - Type: LD.Config
     Enable: false
     Value:
-      PortID: 1
+      PortID: 0
       LDID: 0xffff
       LDType: LD_TYPE_FM_LD
       DOE: true
@@ -166,8 +176,8 @@ CXL_Type3_HDMH_Config:
       PortID: 0
       LDID: 0
       RangeID: 0
-      Start_DPA: 0x0
-      Length: 128GB
+      Start_DPA: 0x0000000000000000
+      Length: 32GB
 
   # ----- Port 0 / LD 0 / Range 1 -----
   - Type: LD.Range
@@ -176,88 +186,88 @@ CXL_Type3_HDMH_Config:
       PortID: 0
       LDID: 0
       RangeID: 1
-      Start_DPA: 0x0
-      Length: 128GB
+      Start_DPA: 0x0000000800000000
+      Length: 32GB
 
   # ----- Port 0 / LD 1 / Range 0 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 1
       RangeID: 0
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000002000000000
+      Length: 32GB
 
   # ----- Port 0 / LD 1 / Range 1 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 1
       RangeID: 1
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000002800000000
+      Length: 32GB
 
   # ----- Port 0 / LD 2 / Range 0 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 2
       RangeID: 0
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000004000000000
+      Length: 32GB
 
   # ----- Port 0 / LD 2 / Range 1 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 2
       RangeID: 1
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000004800000000
+      Length: 32GB
 
   # ----- Port 0 / LD 3 / Range 0 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 3
       RangeID: 0
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000006000000000
+      Length: 32GB
 
   # ----- Port 0 / LD 3 / Range 1 -----
   - Type: LD.Range
-    Enable: false
+    Enable: true
     Value:
       PortID: 0
       LDID: 3
       RangeID: 1
-      Start_DPA: 0x0
-      Length: 0GB
+      Start_DPA: 0x0000006800000000
+      Length: 32GB
 
   # ----- Port 1 / LD 0 / Range 0 -----
   - Type: LD.Range
-    Enable: true
+    Enable: false
     Value:
       PortID: 1
       LDID: 0
       RangeID: 0
       Start_DPA: 0x0
-      Length: 128GB
+      Length: 0GB
 
   # ----- Port 1 / LD 0 / Range 1 -----
   - Type: LD.Range
-    Enable: true
+    Enable: false
     Value:
       PortID: 1
       LDID: 0
       RangeID: 1
       Start_DPA: 0x0
-      Length: 128GB
+      Length: 0GB
 
   # ----- Port 1 / LD 1 / Range 0 -----
   - Type: LD.Range
@@ -319,9 +329,7 @@ CXL_Type3_HDMH_Config:
       Start_DPA: 0x0
       Length: 0GB
 
-  # =========================
-  # Dynamic Capacity Region TLVs (Disabled)
-  # =========================
+
 
   # ----- Port 0 / LD 0 / DC_Region 0 -----
   - Type: LD.DC_Region
@@ -418,6 +426,202 @@ CXL_Type3_HDMH_Config:
       Decode_len: 0GB
       Block_size: 256MB
       Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # =========================
+  # Dynamic Capacity Region TLVs (Enabled)
+  # =========================
+
+  # ----- Port 0 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x00_0000_1000_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x00_0000_1800_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x00_0000_3000_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x00_0000_3800_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x00_0000_5000_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x00_0000_5800_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x00_0000_7000_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
+
+  # ----- Port 0 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: true
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x00_0000_7800_0000_00
+      Decode_len: 32GB
+      Block_size: 256MB
+      Flags: 8
 
   # ----- Port 1 / LD 0 / DC_Region 0 -----
   - Type: LD.DC_Region

@@ -16,7 +16,7 @@
 #define MAX_FM_LD_PER_PORT 1
 #define MAX_REGULAR_LD_PER_PORT 4
 #define MAX_RANGE_PER_REGULAR_LD 2
-#define MAX_DC_REGION_PER_LD 4
+#define MAX_DC_REGION_PER_LD 2
 
 
 /*============================================================================
@@ -83,7 +83,7 @@ typedef enum {
     TLV_TYPE_PORT_CONFIG            = 0x10,  /**< 端口配置 */
     TLV_TYPE_LD_CONFIG              = 0x20,  /**< 逻辑设备配置 */
     TLV_TYPE_LD_RANGE               = 0x30,  /**< 逻辑设备范围配置 */
-    TLV_TYPE_LD_DC_REGION           = 0x31,  /**< 逻辑设备DC区域配置 */
+    TLV_TYPE_LD_DC_REGION           = 0x31,  /**< 逻辑设备动态容量区域配置 */
 } tlv_type_t;
 
 /**

@@ -28,7 +28,8 @@ need_cmd gcc
 need_py_mod yaml
 
 # 可通过环境变量覆盖
-INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgDPortMLD.yaml}"
+#INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgDPortMLD.yaml}"
+INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgSPortMLDDCD.yaml}"
 OUTPUT_DIR="${OUTPUT_DIR:-${PROJECT_ROOT}/output}"
 OUTPUT_BIN="${OUTPUT_BIN:-${OUTPUT_DIR}/test_dmld.bin}"
 SCHEMA_YAML="${SCHEMA_YAML:-${PROJECT_ROOT}/cfg/tlv_schema.yaml}"
