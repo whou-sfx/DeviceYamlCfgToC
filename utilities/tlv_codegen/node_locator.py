@@ -1,12 +1,16 @@
-"""TLV节点定位逻辑生成器。"""
+"""TLV节点定位逻辑生成器（Schema驱动）。"""
 
 from typing import Dict, List
 
+from .name_utils import node_struct_name
+from .type_mapper import CTypeMapper
+
 
 class NodeLocator:
-    """根据TLV类型生成节点定位代码片段。"""
+    """根据TLV类型和Schema中的locator元数据生成节点定位代码片段。"""
     
-    def __init__(self, hierarchy: dict = None):
+    def __init__(self, schemas: Dict[str, dict], hierarchy: dict = None):
+        self.schemas = schemas
         self.hierarchy = hierarchy or {}
         self.device_tlvs = self.hierarchy.get('Device_Level_TLVs', [])
 
@@ -18,102 +22,158 @@ class NodeLocator:
                 for field in struct['fields']:
                     if field.get('from_tlv') == tlv_name:
                         return field['name']
-        # 如果找不到，返回默认转换
-        return tlv_name.lower().replace(".", "_")
+        from .name_utils import tlv_name_to_snake
+        return tlv_name_to_snake(tlv_name)
+
+    def _calculate_field_offset(self, fields: List[dict], field_name: str) -> int:
+        """计算指定字段在TLV value中的字节偏移"""
+        offset = 0
+        for field in fields:
+            if field['name'] == field_name:
+                return offset
+            ftype = field['type']
+            if ftype == 'string':
+                offset += field.get('size', 32)
+            else:
+                offset += CTypeMapper.size(ftype)
+        raise KeyError(f"Field {field_name} not found in schema")
+
+    def _generate_step_code(self, step: dict, fields: List[dict], path_prefix: str) -> List[str]:
+        """为单个 locator step 生成 C 代码"""
+        lines = []
+        
+        # 提取变量（从TLV字段或固定值）
+        if 'fixed_index' in step:
+            var_name = f"idx_{step['array']}"
+            lines.append(f"uint8_t {var_name} = {step['fixed_index']};")
+        elif 'source' in step:
+            var_name = step['var']
+            offset = self._calculate_field_offset(fields, step['source'])
+            lines.append(f"uint8_t {var_name} = v[{offset}];")
+        else:
+            raise ValueError(f"Step must have either 'source' or 'fixed_index': {step}")
+        
+        # 边界检查
+        if 'max' in step:
+            lines.append(f"if ({var_name} >= {step['max']}) {{")
+            lines.append("    return;")
+            lines.append("}")
+        
+        # 更新计数器
+        if 'counter' in step:
+            counter_path = f"{path_prefix}{step['counter']}"
+            lines.append(f"if ({var_name} + 1 > {counter_path}) {{")
+            lines.append(f"    {counter_path} = {var_name} + 1;")
+            lines.append("}")
+        
+        return lines, var_name
+
+    def _generate_dispatch_code(self, dispatch: dict, fields: List[dict], path_prefix: str) -> List[str]:
+        """生成 dispatch 分支代码"""
+        lines = []
+        
+        # 提取 dispatch 变量
+        dispatch_var = dispatch['var']
+        dispatch_source = dispatch['source']
+        offset = self._calculate_field_offset(fields, dispatch_source)
+        lines.append(f"uint8_t {dispatch_var} = v[{offset}];")
+        
+        # 声明指针（后续分支赋值）
+        lines.append("ld_config_node_t *p = NULL;")
+        
+        # 生成各个 case
+        cases = dispatch.get('cases', [])
+        for i, case in enumerate(cases):
+            if case.get('default'):
+                if i == 0:
+                    raise ValueError("default case cannot be first")
+                lines.append("} else {")
+            elif i == 0:
+                match_val = case['match']
+                lines.append(f"if ({dispatch_var} == {match_val}) {{")
+            else:
+                match_val = case['match']
+                lines.append(f"}} else if ({dispatch_var} == {match_val}) {{")
+            
+            # 处理该分支的 steps
+            case_steps = case.get('steps', [])
+            case_path = path_prefix
+            for step in case_steps:
+                step_lines, var_name = self._generate_step_code(step, fields, case_path)
+                for line in step_lines:
+                    lines.append(f"    {line}")
+                
+                if 'array' in step:
+                    case_path += f"{step['array']}[{var_name}]."
+            
+            # 生成目标指针赋值
+            target = case.get('target', 'config')
+            lines.append(f"    p = &{case_path}{target};")
+        
+        lines.append("}")
+        
+        # NULL 检查
+        lines.append("if (p == NULL) {")
+        lines.append("    return;")
+        lines.append("}")
+        
+        return lines
+
+    def _generate_locator_from_metadata(self, tlv_name: str, schema: dict) -> Dict[str, List[str]]:
+        """从 schema 的 locator 元数据生成定位代码"""
+        locator_cfg = schema.get('locator')
+        if not locator_cfg:
+            raise KeyError(f"No locator metadata for TLV: {tlv_name}")
+        
+        fields = schema.get('fields', [])
+        lines = []
+        path = "sem->"
+        
+        # 处理 steps
+        steps = locator_cfg.get('steps', [])
+        for step in steps:
+            step_lines, var_name = self._generate_step_code(step, fields, path)
+            lines.extend(step_lines)
+            
+            if 'array' in step:
+                path += f"{step['array']}[{var_name}]."
+        
+        # 处理 dispatch（如果有）
+        if 'dispatch' in locator_cfg:
+            dispatch_lines = self._generate_dispatch_code(locator_cfg['dispatch'], fields, path)
+            lines.extend(dispatch_lines)
+        else:
+            # 无 dispatch，直接生成指针赋值
+            target = locator_cfg.get('target', '')
+            node_type = node_struct_name(tlv_name)
+            if target:
+                lines.append(f"{node_type} *p = &{path}{target};")
+            else:
+                # 去掉末尾的点
+                path = path.rstrip('.')
+                lines.append(f"{node_type} *p = &{path};")
+        
+        return {
+            "node_type": node_struct_name(tlv_name),
+            "pre_lines": lines,
+        }
 
     def get_locator(self, tlv_name: str) -> Dict[str, List[str]]:
-        # 动态判断是否为 Device 级 TLV
+        """获取指定TLV的定位代码"""
+        # Device 级 TLV：从 hierarchy 查找字段名
         if tlv_name in self.device_tlvs:
-            node_type = self._node_struct_name(tlv_name)
+            node_type = node_struct_name(tlv_name)
             field_name = self._get_device_field_name(tlv_name)
             return {
                 "node_type": node_type,
                 "pre_lines": [f"{node_type} *p = &sem->{field_name};"],
             }
-        if tlv_name == "Port.Config":
-            return {
-                "node_type": "port_config_node_t",
-                "pre_lines": [
-                    "uint8_t port_id = v[0];",
-                    "if (port_id >= MAX_PORTS) {",
-                    "    return;",
-                    "}",
-                    "if (port_id + 1 > sem->port_count) {",
-                    "    sem->port_count = port_id + 1;",
-                    "}",
-                    "port_config_node_t *p = &sem->port[port_id].config;",
-                ],
-            }
-        if tlv_name == "LD.Config":
-            return {
-                "node_type": "ld_config_node_t",
-                "pre_lines": [
-                    "uint8_t port_id = v[0];",
-                    "uint8_t ld_id = v[1];",
-                    "uint8_t ld_type = v[2];",
-                    "if (port_id >= MAX_PORTS) {",
-                    "    return;",
-                    "}",
-                    "if (port_id + 1 > sem->port_count) {",
-                    "    sem->port_count = port_id + 1;",
-                    "}",
-                    "ld_config_node_t *p = NULL;",
-                    "if (ld_type == LD_TYPE_FM_LD) {",
-                    "    if (0 >= MAX_FM_LD_PER_PORT) {",
-                    "        return;",
-                    "    }",
-                    "    if (1 > sem->port[port_id].fm_ld_count) {",
-                    "        sem->port[port_id].fm_ld_count = 1;",
-                    "    }",
-                    "    p = &sem->port[port_id].fm_ld[0].config;",
-                    "} else {",
-                    "    if (ld_id >= MAX_REGULAR_LD_PER_PORT) {",
-                    "        return;",
-                    "    }",
-                    "    if (ld_id + 1 > sem->port[port_id].regular_ld_count) {",
-                    "        sem->port[port_id].regular_ld_count = ld_id + 1;",
-                    "    }",
-                    "    p = &sem->port[port_id].regular_ld[ld_id].config;",
-                    "}",
-                    "if (p == NULL) {",
-                    "    return;",
-                    "}",
-                ],
-            }
-        if tlv_name == "LD.Range":
-            return {
-                "node_type": "ld_range_node_t",
-                "pre_lines": [
-                    "uint8_t port_id = v[0];",
-                    "uint8_t ld_id = v[1];",
-                    "uint8_t range_id = v[2];",
-                    "if (port_id >= MAX_PORTS) {",
-                    "    return;",
-                    "}",
-                    "if (ld_id >= MAX_REGULAR_LD_PER_PORT) {",
-                    "    return;",
-                    "}",
-                    "if (range_id >= MAX_RANGE_PER_REGULAR_LD) {",
-                    "    return;",
-                    "}",
-                    "if (port_id + 1 > sem->port_count) {",
-                    "    sem->port_count = port_id + 1;",
-                    "}",
-                    "if (ld_id + 1 > sem->port[port_id].regular_ld_count) {",
-                    "    sem->port[port_id].regular_ld_count = ld_id + 1;",
-                    "}",
-                    "if (range_id + 1 > sem->port[port_id].regular_ld[ld_id].range_count) {",
-                    "    sem->port[port_id].regular_ld[ld_id].range_count = range_id + 1;",
-                    "}",
-                    "ld_range_node_t *p = &sem->port[port_id].regular_ld[ld_id].range[range_id];",
-                ],
-            }
-        raise KeyError(f"Unsupported TLV name for locator: {tlv_name}")
-    
-    def _node_struct_name(self, tlv_name: str) -> str:
-        """TLV名称转结构体类型名"""
-        if tlv_name == "Device.PortCapability":
-            return "device_port_capability_node_t"
-        return tlv_name.lower().replace(".", "_") + "_node_t"
+        
+        # 非 Device 级 TLV：从 schema 的 locator 元数据生成
+        if tlv_name not in self.schemas:
+            raise KeyError(f"TLV {tlv_name} not found in schemas")
+        
+        schema = self.schemas[tlv_name]
+        return self._generate_locator_from_metadata(tlv_name, schema)
 
 

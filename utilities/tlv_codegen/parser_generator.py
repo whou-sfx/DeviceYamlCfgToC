@@ -3,6 +3,7 @@
 from typing import Dict, List
 
 from .field_reader import FieldReader
+from .name_utils import map_func_name, node_struct_name, tlv_type_enum_name
 from .node_locator import NodeLocator
 from .type_mapper import CTypeMapper
 
@@ -11,10 +12,10 @@ class ParserGenerator:
     def __init__(self, schemas: Dict[str, dict], hierarchy: dict = None):
         self.schemas = schemas
         self.hierarchy = hierarchy or {}
-        self.node_locator = NodeLocator(hierarchy)
+        self.node_locator = NodeLocator(schemas, hierarchy)
 
     def _map_func_name(self, tlv_name: str) -> str:
-        return "map_" + tlv_name.lower().replace(".", "_")
+        return map_func_name(tlv_name)
 
     def generate_header(self) -> str:
         lines: List[str] = [
@@ -182,21 +183,20 @@ class ParserGenerator:
                 "",
                 "    for (uint16_t i = 0; i < index_count; i++) {",
                 "        switch (index[i].type) {",
-                "            case TLV_TYPE_DEVICE_BASIC:",
-                f"                {self._map_func_name('Device.Basic')}(binary, &index[i], sem);",
+            ]
+        )
+
+        for tlv_name in self.schemas.keys():
+            enum_name = tlv_type_enum_name(tlv_name)
+            func_name = self._map_func_name(tlv_name)
+            lines.extend([
+                f"            case {enum_name}:",
+                f"                {func_name}(binary, &index[i], sem);",
                 "                break;",
-                "            case TLV_TYPE_DEVICE_PORT_CAPABILITY:",
-                f"                {self._map_func_name('Device.PortCapability')}(binary, &index[i], sem);",
-                "                break;",
-                "            case TLV_TYPE_PORT_CONFIG:",
-                f"                {self._map_func_name('Port.Config')}(binary, &index[i], sem);",
-                "                break;",
-                "            case TLV_TYPE_LD_CONFIG:",
-                f"                {self._map_func_name('LD.Config')}(binary, &index[i], sem);",
-                "                break;",
-                "            case TLV_TYPE_LD_RANGE:",
-                f"                {self._map_func_name('LD.Range')}(binary, &index[i], sem);",
-                "                break;",
+            ])
+
+        lines.extend(
+            [
                 "            default:",
                 "                break;",
                 "        }",

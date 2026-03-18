@@ -47,6 +47,14 @@ TLV_Schemas:
   Port.Config:
     type_id: 0x10
     description: "端口配置"
+    locator:
+      steps:
+        - var: port_id
+          source: PortID
+          array: port
+          max: MAX_PORTS
+          counter: port_count
+      target: config
     fields:
       - name: PortID
         type: u8
@@ -73,6 +81,10 @@ TLV_Schemas:
         parser: enum
         enum_type: ld_mode_t
         description: "逻辑设备模式"
+        
+      - name: DCD_Supported
+        type: bool
+        description: "是否支持DCD"
     
     alignment: 4
 
@@ -83,6 +95,32 @@ TLV_Schemas:
   LD.Config:
     type_id: 0x20
     description: "逻辑设备配置"
+    locator:
+      steps:
+        - var: port_id
+          source: PortID
+          array: port
+          max: MAX_PORTS
+          counter: port_count
+      dispatch:
+        var: ld_type
+        source: LDType
+        cases:
+          - match: LD_TYPE_FM_LD
+            steps:
+              - fixed_index: 0
+                array: fm_ld
+                max: MAX_FM_LD_PER_PORT
+                counter: fm_ld_count
+            target: config
+          - default: true
+            steps:
+              - var: ld_id
+                source: LDID
+                array: regular_ld
+                max: MAX_REGULAR_LD_PER_PORT
+                counter: regular_ld_count
+            target: config
     fields:
       - name: PortID
         type: u8
@@ -115,6 +153,23 @@ TLV_Schemas:
   LD.Range:
     type_id: 0x30
     description: "逻辑设备范围配置"
+    locator:
+      steps:
+        - var: port_id
+          source: PortID
+          array: port
+          max: MAX_PORTS
+          counter: port_count
+        - var: ld_id
+          source: LDID
+          array: regular_ld
+          max: MAX_REGULAR_LD_PER_PORT
+          counter: regular_ld_count
+        - var: range_id
+          source: RangeID
+          array: range
+          max: MAX_RANGE_PER_REGULAR_LD
+          counter: range_count
     fields:
       - name: PortID
         type: u8
@@ -131,20 +186,66 @@ TLV_Schemas:
       - name: Start_DPA
         type: u64
         parser: hex_string
-        description: "起始DPA地址（支持十六进制和下划线分隔），SharedModeEnable的时候有效"
+        description: "起始DPA地址（支持十六进制和下划线分隔）"
         
       - name: Length
         type: u64
         parser: size_string
         description: "长度（支持GB/MB/KB/B后缀）"
+    
+    alignment: 4
+
+  LD.DC_Region:
+    type_id: 0x31
+    description: "动态容量区域配置"
+    locator:
+      steps:
+        - var: port_id
+          source: PortID
+          array: port
+          max: MAX_PORTS
+          counter: port_count
+        - var: ld_id
+          source: LDID
+          array: regular_ld
+          max: MAX_REGULAR_LD_PER_PORT
+          counter: regular_ld_count
+        - var: dc_region_id
+          source: DC_RegionID
+          array: dc_region
+          max: MAX_DC_REGION_PER_LD
+          counter: dc_region_count
+    fields:
+      - name: PortID
+        type: u8
+        description: "端口ID"
         
-      - name: DCD_Supported
-        type: bool
-        description: "是否支持DCD"
+      - name: LDID
+        type: u8
+        description: "逻辑设备ID"
         
-      - name: ShareModeEnable
-        type: bool
-        description: "是否启用共享模式, 只有在DCD_Supported的时候有效"
+      - name: DC_RegionID
+        type: u8
+        description: "DC区域ID"
+        
+      - name: Start_DPA
+        type: u64
+        parser: hex_string
+        description: "起始DPA地址"
+        
+      - name: Decode_len
+        type: u64
+        parser: size_string
+        description: "解码长度（支持GB/MB/KB/B后缀）"
+        
+      - name: Block_size
+        type: u64
+        parser: size_string
+        description: "块大小（支持GB/MB/KB/B后缀，最小256MB）"
+        
+      - name: Flags
+        type: u8
+        description: "CDAT DSMAS标志位（bit3=sharable, bit2=hw_managed_coherency等）"
     
     alignment: 4
 
@@ -206,6 +307,12 @@ Hierarchy:
           from_tlv: LD.Range
           array: MAX_RANGE_PER_REGULAR_LD
         - name: range_count
+          type: uint8_t
+        - name: dc_region
+          type: ld_dc_region_node_t
+          from_tlv: LD.DC_Region
+          array: MAX_DC_REGION_PER_LD
+        - name: dc_region_count
           type: uint8_t
     
     # FM LD 结构

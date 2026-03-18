@@ -156,12 +156,10 @@ int main(int argc, char *argv[])
             printf("✓ Port %u, LD %u has %u ranges\n", p, l, sem.port[p].regular_ld[l].range_count);
             for (uint8_t r = 0; r < sem.port[p].regular_ld[l].range_count && r < MAX_RANGE_PER_REGULAR_LD; r++) {
                 if (sem.port[p].regular_ld[l].range[r].present) {
-                    printf("  Range %u: Start=0x%llx, Length=%llu (32GB), DCD=%u, ShareMode=%u\n",
+                    printf("  Range %u: Start=0x%llx, Length=%llu (32GB)\n",
                            r,
                            (unsigned long long)sem.port[p].regular_ld[l].range[r].Start_DPA,
-                           (unsigned long long)sem.port[p].regular_ld[l].range[r].Length,
-                           sem.port[p].regular_ld[l].range[r].DCD_Supported,
-                           sem.port[p].regular_ld[l].range[r].ShareModeEnable);
+                           (unsigned long long)sem.port[p].regular_ld[l].range[r].Length);
                 }
             }
         }

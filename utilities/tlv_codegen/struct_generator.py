@@ -2,6 +2,7 @@
 
 from typing import Dict, List
 
+from .name_utils import node_struct_name
 from .type_mapper import CTypeMapper
 
 
@@ -10,13 +11,8 @@ class StructGenerator:
         self.schemas = schemas
         self.hierarchy = hierarchy or {}
 
-    def _node_struct_name(self, tlv_name: str) -> str:
-        if tlv_name == "Device.PortCapability":
-            return "device_port_capability_node_t"
-        return tlv_name.lower().replace(".", "_") + "_node_t"
-
     def _emit_node_struct(self, tlv_name: str, schema: dict) -> List[str]:
-        struct_name = self._node_struct_name(tlv_name)
+        struct_name = node_struct_name(tlv_name)
         fields = schema.get("fields", [])
         lines = [
             f"typedef struct {{",
