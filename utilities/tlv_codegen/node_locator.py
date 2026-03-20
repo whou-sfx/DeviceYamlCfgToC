@@ -38,10 +38,11 @@ class NodeLocator:
                 offset += CTypeMapper.size(ftype)
         raise KeyError(f"Field {field_name} not found in schema")
 
-    def _generate_step_code(self, step: dict, fields: List[dict], path_prefix: str) -> List[str]:
+    def _generate_step_code(self, step: dict, fields: List[dict], path_prefix: str,
+                            update_counter: bool = True) -> List[str]:
         """为单个 locator step 生成 C 代码"""
         lines = []
-        
+
         # 提取变量（从TLV字段或固定值）
         if 'fixed_index' in step:
             var_name = f"idx_{step['array']}"
@@ -52,35 +53,34 @@ class NodeLocator:
             lines.append(f"uint8_t {var_name} = v[{offset}];")
         else:
             raise ValueError(f"Step must have either 'source' or 'fixed_index': {step}")
-        
+
         # 边界检查
         if 'max' in step:
             lines.append(f"if ({var_name} >= {step['max']}) {{")
             lines.append("    return;")
             lines.append("}")
-        
-        # 更新计数器
-        if 'counter' in step:
+
+        # 更新计数器（仅当 update_counter=True 时）
+        if update_counter and 'counter' in step:
             counter_path = f"{path_prefix}{step['counter']}"
-            lines.append(f"if ({var_name} + 1 > {counter_path}) {{")
-            lines.append(f"    {counter_path} = {var_name} + 1;")
-            lines.append("}")
-        
+            # 改为递增模式：直接 ++，不再使用 max 逻辑
+            lines.append(f"{counter_path}++;")
+
         return lines, var_name
 
     def _generate_dispatch_code(self, dispatch: dict, fields: List[dict], path_prefix: str) -> List[str]:
         """生成 dispatch 分支代码"""
         lines = []
-        
+
         # 提取 dispatch 变量
         dispatch_var = dispatch['var']
         dispatch_source = dispatch['source']
         offset = self._calculate_field_offset(fields, dispatch_source)
         lines.append(f"uint8_t {dispatch_var} = v[{offset}];")
-        
+
         # 声明指针（后续分支赋值）
         lines.append("ld_config_node_t *p = NULL;")
-        
+
         # 生成各个 case
         cases = dispatch.get('cases', [])
         for i, case in enumerate(cases):
@@ -94,29 +94,31 @@ class NodeLocator:
             else:
                 match_val = case['match']
                 lines.append(f"}} else if ({dispatch_var} == {match_val}) {{")
-            
+
             # 处理该分支的 steps
             case_steps = case.get('steps', [])
             case_path = path_prefix
-            for step in case_steps:
-                step_lines, var_name = self._generate_step_code(step, fields, case_path)
+            for j, step in enumerate(case_steps):
+                # 该分支的最后一个 step 才更新计数器
+                is_last_step = (j == len(case_steps) - 1)
+                step_lines, var_name = self._generate_step_code(step, fields, case_path, update_counter=is_last_step)
                 for line in step_lines:
                     lines.append(f"    {line}")
-                
+
                 if 'array' in step:
                     case_path += f"{step['array']}[{var_name}]."
-            
+
             # 生成目标指针赋值
             target = case.get('target', 'config')
             lines.append(f"    p = &{case_path}{target};")
-        
+
         lines.append("}")
-        
+
         # NULL 检查
         lines.append("if (p == NULL) {")
         lines.append("    return;")
         lines.append("}")
-        
+
         return lines
 
     def _generate_locator_from_metadata(self, tlv_name: str, schema: dict) -> Dict[str, List[str]]:
@@ -124,20 +126,22 @@ class NodeLocator:
         locator_cfg = schema.get('locator')
         if not locator_cfg:
             raise KeyError(f"No locator metadata for TLV: {tlv_name}")
-        
+
         fields = schema.get('fields', [])
         lines = []
         path = "sem->"
-        
+
         # 处理 steps
         steps = locator_cfg.get('steps', [])
-        for step in steps:
-            step_lines, var_name = self._generate_step_code(step, fields, path)
+        for i, step in enumerate(steps):
+            # 只有最后一个 step 才更新计数器
+            is_last_step = (i == len(steps) - 1) and ('dispatch' not in locator_cfg)
+            step_lines, var_name = self._generate_step_code(step, fields, path, update_counter=is_last_step)
             lines.extend(step_lines)
-            
+
             if 'array' in step:
                 path += f"{step['array']}[{var_name}]."
-        
+
         # 处理 dispatch（如果有）
         if 'dispatch' in locator_cfg:
             dispatch_lines = self._generate_dispatch_code(locator_cfg['dispatch'], fields, path)
@@ -152,7 +156,7 @@ class NodeLocator:
                 # 去掉末尾的点
                 path = path.rstrip('.')
                 lines.append(f"{node_type} *p = &{path};")
-        
+
         return {
             "node_type": node_struct_name(tlv_name),
             "pre_lines": lines,

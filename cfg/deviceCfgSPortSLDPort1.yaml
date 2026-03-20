@@ -1,0 +1,517 @@
+CXL_Type3_HDMH_Config:
+
+  # =========================
+  # Device Level TLVs
+  # =========================
+  - Type: Device.Basic
+    Enable: true
+    Value:
+      TotalDRAMCapacity: 512GB
+      DRAMShareable: true
+
+  - Type: Device.PortCapability
+    Enable: true
+    Value:
+      MaxPorts: 1
+
+  # =========================
+  # PCIe Port TLVs
+  # =========================
+  - Type: Port.Config
+    Enable: false
+    Value:
+      PortID: 0
+      EnablePort: true
+      PCIeSpeed: PCIE_SPEED_GEN5
+      PCIeWidth: PCIE_WIDTH_X16
+      LDMode: LD_MODE_SLD        # LD_MODE_SLD / LD_MODE_MLD
+      DCD_Supported: false
+
+  - Type: Port.Config
+    Enable: true
+    Value:
+      PortID: 1
+      EnablePort: true
+      PCIeSpeed: PCIE_SPEED_GEN3
+      PCIeWidth: PCIE_WIDTH_X16
+      LDMode: LD_MODE_SLD
+      DCD_Supported: false
+
+  # =========================
+  # Logical Device (LD) TLVs
+  # =========================
+  # ----- Port 0 : Disabled -----
+  # ----- Port 0 : Regular LD 0 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 1 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 2 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 0 : Regular LD 3 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+
+  # ----- Port 0 : FM-LD -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0xffff
+      LDType: LD_TYPE_FM_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 1 : SLD (only one Regular LD) -----
+  # ----- Port 1 : Regular LD 0 -----
+  - Type: LD.Config
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 1 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 2 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+  # ----- Port 1 : Regular LD 3 -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      LDType: LD_TYPE_REGULAR_LD
+      DOE: false
+      SecurityDOE: false
+      Mailbox: true
+
+
+  # ----- Port 1 : FM-LD -----
+  - Type: LD.Config
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0xffff
+      LDType: LD_TYPE_FM_LD
+      DOE: true
+      SecurityDOE: true
+      Mailbox: true
+
+
+  # =========================
+  # Regular LD Range TLVs
+  # =========================
+
+  # ----- Port 0 / LD 0 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 0 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 1 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 1 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 2 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 2 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 3 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 0 / LD 3 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 0 / Range 0 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 256GB
+
+  # ----- Port 1 / LD 0 / Range 1 -----
+  - Type: LD.Range
+    Enable: true
+    Value:
+      PortID: 1
+      LDID: 0
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 256GB
+
+  # ----- Port 1 / LD 1 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 1 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 2 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 2 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 3 / Range 0 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      RangeID: 0
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # ----- Port 1 / LD 3 / Range 1 -----
+  - Type: LD.Range
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      RangeID: 1
+      Start_DPA: 0x0
+      Length: 0GB
+
+  # =========================
+  # Dynamic Capacity Region TLVs (Disabled)
+  # =========================
+
+  # ----- Port 0 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 0 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 0
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 0 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 0
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 1 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 1
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 2 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 2
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 0 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 0
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+
+  # ----- Port 1 / LD 3 / DC_Region 1 -----
+  - Type: LD.DC_Region
+    Enable: false
+    Value:
+      PortID: 1
+      LDID: 3
+      DC_RegionID: 1
+      Start_DPA: 0x0
+      Decode_len: 0GB
+      Block_size: 256MB
+      Flags: 0
+

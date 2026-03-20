@@ -35,7 +35,7 @@ Thumbs.db
 #Gtags
 GRTAGS
 GPATH
-GTAGS
+GTAGS*
 
 #auto generate code
 ./src/lib/*

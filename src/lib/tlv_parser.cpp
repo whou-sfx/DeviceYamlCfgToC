@@ -96,9 +96,7 @@ static void map_port_config(const uint8_t *buf, const tlv_index_t *idx, device_s
     if (port_id >= MAX_PORTS) {
         return;
     }
-    if (port_id + 1 > sem->port_count) {
-        sem->port_count = port_id + 1;
-    }
+    sem->port_count++;
     port_config_node_t *p = &sem->port[port_id].config;
     p->present = 1;
     p->dirty = 0;
@@ -156,9 +154,6 @@ static void map_ld_config(const uint8_t *buf, const tlv_index_t *idx, device_sem
     if (port_id >= MAX_PORTS) {
         return;
     }
-    if (port_id + 1 > sem->port_count) {
-        sem->port_count = port_id + 1;
-    }
     uint8_t ld_type = v[2];
     ld_config_node_t *p = NULL;
     if (ld_type == LD_TYPE_FM_LD) {
@@ -166,18 +161,14 @@ static void map_ld_config(const uint8_t *buf, const tlv_index_t *idx, device_sem
         if (idx_fm_ld >= MAX_FM_LD_PER_PORT) {
             return;
         }
-        if (idx_fm_ld + 1 > sem->port[port_id].fm_ld_count) {
-            sem->port[port_id].fm_ld_count = idx_fm_ld + 1;
-        }
+        sem->port[port_id].fm_ld_count++;
         p = &sem->port[port_id].fm_ld[idx_fm_ld].config;
     } else {
         uint8_t ld_id = v[1];
         if (ld_id >= MAX_REGULAR_LD_PER_PORT) {
             return;
         }
-        if (ld_id + 1 > sem->port[port_id].regular_ld_count) {
-            sem->port[port_id].regular_ld_count = ld_id + 1;
-        }
+        sem->port[port_id].regular_ld_count++;
         p = &sem->port[port_id].regular_ld[ld_id].config;
     }
     if (p == NULL) {
@@ -239,23 +230,15 @@ static void map_ld_range(const uint8_t *buf, const tlv_index_t *idx, device_sema
     if (port_id >= MAX_PORTS) {
         return;
     }
-    if (port_id + 1 > sem->port_count) {
-        sem->port_count = port_id + 1;
-    }
     uint8_t ld_id = v[1];
     if (ld_id >= MAX_REGULAR_LD_PER_PORT) {
         return;
-    }
-    if (ld_id + 1 > sem->port[port_id].regular_ld_count) {
-        sem->port[port_id].regular_ld_count = ld_id + 1;
     }
     uint8_t range_id = v[2];
     if (range_id >= MAX_RANGE_PER_REGULAR_LD) {
         return;
     }
-    if (range_id + 1 > sem->port[port_id].regular_ld[ld_id].range_count) {
-        sem->port[port_id].regular_ld[ld_id].range_count = range_id + 1;
-    }
+    sem->port[port_id].regular_ld[ld_id].range_count++;
     ld_range_node_t *p = &sem->port[port_id].regular_ld[ld_id].range[range_id];
     p->present = 1;
     p->dirty = 0;
@@ -307,23 +290,15 @@ static void map_ld_dc_region(const uint8_t *buf, const tlv_index_t *idx, device_
     if (port_id >= MAX_PORTS) {
         return;
     }
-    if (port_id + 1 > sem->port_count) {
-        sem->port_count = port_id + 1;
-    }
     uint8_t ld_id = v[1];
     if (ld_id >= MAX_REGULAR_LD_PER_PORT) {
         return;
-    }
-    if (ld_id + 1 > sem->port[port_id].regular_ld_count) {
-        sem->port[port_id].regular_ld_count = ld_id + 1;
     }
     uint8_t dc_region_id = v[2];
     if (dc_region_id >= MAX_DC_REGION_PER_LD) {
         return;
     }
-    if (dc_region_id + 1 > sem->port[port_id].regular_ld[ld_id].dc_region_count) {
-        sem->port[port_id].regular_ld[ld_id].dc_region_count = dc_region_id + 1;
-    }
+    sem->port[port_id].regular_ld[ld_id].dc_region_count++;
     ld_dc_region_node_t *p = &sem->port[port_id].regular_ld[ld_id].dc_region[dc_region_id];
     p->present = 1;
     p->dirty = 0;

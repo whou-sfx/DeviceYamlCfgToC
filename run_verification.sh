@@ -5,22 +5,25 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 
 say() { echo -e "$*"; }
-die() { echo "ERROR: $*" 1>&2; exit 1; }
+die() {
+    echo "ERROR: $*" 1>&2
+    exit 1
+}
 
 need_cmd() {
-  command -v "$1" >/dev/null 2>&1 || die "缺少命令: $1"
+    command -v "$1" >/dev/null 2>&1 || die "缺少命令: $1"
 }
 
 need_py_mod() {
-  local mod="$1"
-  python3 -c "import ${mod}" >/dev/null 2>&1 || {
-    say "缺少Python依赖模块: ${mod}"
-    say "请安装依赖后重试，例如："
-    say "  pip install -r utilities/yaml_to_tlvbinary/requirements.txt"
-    say "或："
-    say "  pip install 'PyYAML>=6.0'"
-    exit 1
-  }
+    local mod="$1"
+    python3 -c "import ${mod}" >/dev/null 2>&1 || {
+        say "缺少Python依赖模块: ${mod}"
+        say "请安装依赖后重试，例如："
+        say "  pip install -r utilities/yaml_to_tlvbinary/requirements.txt"
+        say "或："
+        say "  pip install 'PyYAML>=6.0'"
+        exit 1
+    }
 }
 
 need_cmd python3
@@ -28,8 +31,8 @@ need_cmd gcc
 need_py_mod yaml
 
 # 可通过环境变量覆盖
-#INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgDPortMLD.yaml}"
-INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgSPortMLDDCD.yaml}"
+INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgDPortMLD.yaml}"
+#INPUT_YAML="${INPUT_YAML:-${PROJECT_ROOT}/cfg/deviceCfgSPortSLDPort1.yaml}"
 OUTPUT_DIR="${OUTPUT_DIR:-${PROJECT_ROOT}/output}"
 OUTPUT_BIN="${OUTPUT_BIN:-${OUTPUT_DIR}/test_dmld.bin}"
 SCHEMA_YAML="${SCHEMA_YAML:-${PROJECT_ROOT}/cfg/tlv_schema.yaml}"
@@ -61,8 +64,8 @@ say ""
 say "== [3] Generate C parser code =="
 cd "${PROJECT_ROOT}"
 python3 -m utilities.tlv_codegen.generate_tlv_parser \
-  --schema "${SCHEMA_YAML}" \
-  --output-dir "${LIB_DIR}"
+    --schema "${SCHEMA_YAML}" \
+    --output-dir "${LIB_DIR}"
 say ""
 
 say "== [4] Build test executable =="
@@ -77,11 +80,11 @@ cd "${PROJECT_ROOT}"
 ld -r -b binary -o "${EMBED_OBJ}" "${EMBED_SRC_REL}"
 
 g++ -Wall -Wextra -D__SMOKE_TEST__=1 -I"${PROJECT_ROOT}" \
-  "${PROJECT_ROOT}/src/test/test_tlv_parser.c" \
-  "${PROJECT_ROOT}/src/lib/tlv_parser.cpp" \
-  "${EMBED_OBJ}" \
-  -fno-pie -no-pie \
-  -o "${TEST_EXE}"
+    "${PROJECT_ROOT}/src/test/test_tlv_parser.c" \
+    "${PROJECT_ROOT}/src/lib/tlv_parser.cpp" \
+    "${EMBED_OBJ}" \
+    -fno-pie -no-pie \
+    -o "${TEST_EXE}"
 say "Built: ${TEST_EXE}"
 say ""
 
@@ -90,5 +93,3 @@ say "== [5] Run tests =="
 say ""
 
 say "=== All tests passed ==="
-
-
