@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     printf("[2] Verifying Device Level...\n");
     if (HAS_DEVICE_BASIC(&sem)) {
         printf("✓ Device.Basic present\n");
-        printf("  TotalDRAMCapacity: %llu (512GB)\n", (unsigned long long)sem.device_basic.TotalDRAMCapacity);
+        printf("  TotalDRAMCapacity: %llu (%ldGB)\n", (unsigned long long)sem.device_basic.TotalDRAMCapacity, (sem.device_basic.TotalDRAMCapacity >> 30));
     }
     if (sem.device_port_capability.present) {
         printf("✓ Device.PortCapability present\n");
