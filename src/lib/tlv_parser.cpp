@@ -52,12 +52,6 @@ static void map_device_basic(const uint8_t *buf, const tlv_index_t *idx, device_
     } else {
         p->fd_TotalDRAMCapacity = (field_descriptor_t){ .offset = (uint16_t)(base + 0), .type = FIELD_TYPE_U64, .present = 0 };
     }
-    if (len >= 9) {
-        p->DRAMShareable = v[8];
-        p->fd_DRAMShareable = (field_descriptor_t){ .offset = (uint16_t)(base + 8), .type = FIELD_TYPE_BOOL, .present = 1 };
-    } else {
-        p->fd_DRAMShareable = (field_descriptor_t){ .offset = (uint16_t)(base + 8), .type = FIELD_TYPE_BOOL, .present = 0 };
-    }
 }
 
 static void map_device_port_capability(const uint8_t *buf, const tlv_index_t *idx, device_semantic_t *sem)

@@ -41,11 +41,9 @@ typedef struct {
 
     /* 字段值 */
     uint64_t TotalDRAMCapacity;
-    uint8_t DRAMShareable;
 
     /* 字段描述符 */
     field_descriptor_t fd_TotalDRAMCapacity;
-    field_descriptor_t fd_DRAMShareable;
 } device_basic_node_t;
 
 typedef struct {

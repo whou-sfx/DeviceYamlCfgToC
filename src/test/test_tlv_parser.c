@@ -116,7 +116,6 @@ int main(int argc, char *argv[])
     if (HAS_DEVICE_BASIC(&sem)) {
         printf("✓ Device.Basic present\n");
         printf("  TotalDRAMCapacity: %llu (512GB)\n", (unsigned long long)sem.device_basic.TotalDRAMCapacity);
-        printf("  DRAMShareable: %u\n", sem.device_basic.DRAMShareable);
     }
     if (sem.device_port_capability.present) {
         printf("✓ Device.PortCapability present\n");

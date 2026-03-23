@@ -23,10 +23,6 @@ TLV_Schemas:
         type: u64
         parser: size_string
         description: "总DRAM容量（支持GB/MB/KB/B后缀）"
-        
-      - name: DRAMShareable
-        type: bool
-        description: "DRAM是否可共享"
     
     alignment: 4
 

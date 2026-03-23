@@ -7,7 +7,6 @@ CXL_Type3_HDMH_Config:
     Enable: true
     Value:
       TotalDRAMCapacity: 512GB
-      DRAMShareable: true
 
   - Type: Device.PortCapability
     Enable: true
