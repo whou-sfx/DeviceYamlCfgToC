@@ -81,6 +81,10 @@ TLV_Schemas:
       - name: DCD_Supported
         type: bool
         description: "是否支持DCD"
+        
+      - name: MLD_StartLDid
+        type: u16
+        description: "MLD模式下的起始LD ID（仅在LDMode为MLD时有效）"
     
     alignment: 4
 

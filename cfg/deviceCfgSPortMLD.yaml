@@ -25,6 +25,7 @@ CXL_Type3_HDMH_Config:
       PCIeWidth: PCIE_WIDTH_X16
       LDMode: LD_MODE_MLD        # LD_MODE_SLD / LD_MODE_MLD
       DCD_Supported: false
+      MLD_StartLDid: 0
 
   - Type: Port.Config
     Enable: false
@@ -35,6 +36,7 @@ CXL_Type3_HDMH_Config:
       PCIeWidth: PCIE_WIDTH_X16
       LDMode: LD_MODE_SLD
       DCD_Supported: false
+      MLD_StartLDid: 0
 
   # =========================
   # Logical Device (LD) TLVs

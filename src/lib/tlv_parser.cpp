@@ -133,6 +133,12 @@ static void map_port_config(const uint8_t *buf, const tlv_index_t *idx, device_s
     } else {
         p->fd_DCD_Supported = (field_descriptor_t){ .offset = (uint16_t)(base + 5), .type = FIELD_TYPE_BOOL, .present = 0 };
     }
+    if (len >= 8) {
+        p->MLD_StartLDid = (v[6] | ((uint16_t)v[7] << 8));
+        p->fd_MLD_StartLDid = (field_descriptor_t){ .offset = (uint16_t)(base + 6), .type = FIELD_TYPE_U16, .present = 1 };
+    } else {
+        p->fd_MLD_StartLDid = (field_descriptor_t){ .offset = (uint16_t)(base + 6), .type = FIELD_TYPE_U16, .present = 0 };
+    }
 }
 
 static void map_ld_config(const uint8_t *buf, const tlv_index_t *idx, device_semantic_t *sem)

@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
             printf("  PCIeWidth: %u (x%u)\n", sem.port[i].config.PCIeWidth, sem.port[i].config.PCIeWidth);
             printf("  LDMode: %u (%s)\n", sem.port[i].config.LDMode,
                    sem.port[i].config.LDMode == LD_MODE_MLD ? "MLD" : "SLD");
+            printf("  MLD_StartLDid: %u\n", sem.port[i].config.MLD_StartLDid);
         }
     }
     // 验证统计的 port_count 与实际启用的数量一致
@@ -194,7 +195,15 @@ int main(int argc, char *argv[])
         free(buffer);
         return 1;
     }
-    printf("✓ Read Port %u LDMode: %llu\n\n", first_enabled_port, (unsigned long long)value);
+    printf("✓ Read Port %u LDMode: %llu\n", first_enabled_port, (unsigned long long)value);
+    
+    // 测试读取 MLD_StartLDid 字段
+    if (semantic_read_field(&sem, &sem.port[first_enabled_port].config.fd_MLD_StartLDid, &value) != 0) {
+        fprintf(stderr, "✗ MLD_StartLDid field read failed\n");
+        free(buffer);
+        return 1;
+    }
+    printf("✓ Read Port %u MLD_StartLDid: %llu\n\n", first_enabled_port, (unsigned long long)value);
 
     printf("[7] Testing field write...\n");
     if (semantic_write_field(&sem, &sem.port[first_enabled_port].config.fd_LDMode, LD_MODE_SLD) != 0) {

@@ -72,6 +72,7 @@ typedef struct {
     uint8_t PCIeWidth;
     uint8_t LDMode;
     uint8_t DCD_Supported;
+    uint16_t MLD_StartLDid;
 
     /* 字段描述符 */
     field_descriptor_t fd_PortID;
@@ -80,6 +81,7 @@ typedef struct {
     field_descriptor_t fd_PCIeWidth;
     field_descriptor_t fd_LDMode;
     field_descriptor_t fd_DCD_Supported;
+    field_descriptor_t fd_MLD_StartLDid;
 } port_config_node_t;
 
 typedef struct {
